@@ -53,87 +53,34 @@ jobs:
             fi
 
             # 3. Tulis berkas .env produksi secara otomatis dari GitHub Secrets
-            cat << EOF > .env
-APP_NAME="SIMUKIM"
-APP_ENV="production"
-APP_KEY="${{ secrets.ENV_APP_KEY }}"
-APP_DEBUG="false"
-APP_TIMEZONE="Asia/Jakarta"
-APP_URL="${APP_URL_VAL}"
+            echo 'APP_NAME="SIMUKIM"' > .env
+            echo 'APP_ENV="production"' >> .env
+            echo "APP_KEY=\"${{ secrets.ENV_APP_KEY }}\"" >> .env
+            echo 'APP_DEBUG=false' >> .env
+            echo 'APP_TIMEZONE="Asia/Jakarta"' >> .env
+            echo "APP_URL=\"$APP_URL_VAL\"" >> .env
+            echo 'DB_CONNECTION="mysql"' >> .env
+            echo 'DB_HOST="db"' >> .env
+            echo 'DB_PORT="3306"' >> .env
+            echo "DB_DATABASE=\"${{ secrets.ENV_DB_DATABASE || 'mahad_db' }}\"" >> .env
+            echo "DB_USERNAME=\"${{ secrets.ENV_DB_USERNAME || 'mahad_user' }}\"" >> .env
+            echo "DB_PASSWORD=\"${{ secrets.ENV_DB_PASSWORD }}\"" >> .env
+            echo "DB_ROOT_PASSWORD=\"${{ secrets.ENV_DB_ROOT_PASSWORD || secrets.ENV_DB_PASSWORD }}\"" >> .env
+            echo "CAMPUS_API_BASE_URL=\"${{ secrets.ENV_CAMPUS_API_BASE_URL || 'https://bridge.uinssc.ac.id' }}\"" >> .env
+            echo "BRIDGE_API_URL=\"${{ secrets.ENV_BRIDGE_API_URL || 'https://bridge.uinssc.ac.id' }}\"" >> .env
+            echo 'CAMPUS_API_TIMEOUT=5' >> .env
+            echo 'CAMPUS_API_VERIFY_SSL=true' >> .env
+            echo "SAHAJA_API_URL=\"${{ secrets.ENV_SAHAJA_API_URL || 'https://sahaja.uinssc.ac.id' }}\"" >> .env
+            echo "SAHAJA_API_KEY=\"${{ secrets.ENV_SAHAJA_API_KEY }}\"" >> .env
+            echo 'SAHAJA_API_TIMEOUT=5' >> .env
+            echo 'SAHAJA_API_VERIFY_SSL=true' >> .env
+            echo 'SESSION_DRIVER="file"' >> .env
+            echo 'CACHE_STORE="file"' >> .env
+            echo 'QUEUE_CONNECTION="sync"' >> .env
+            echo 'FILESYSTEM_DISK="local"' >> .env
 
-DB_CONNECTION="mysql"
-DB_HOST="db"
-DB_PORT="3306"
-DB_DATABASE="${{ secrets.ENV_DB_DATABASE || 'mahad_db' }}"
-DB_USERNAME="${{ secrets.ENV_DB_USERNAME || 'mahad_user' }}"
-DB_PASSWORD="${{ secrets.ENV_DB_PASSWORD }}"
-DB_ROOT_PASSWORD="${{ secrets.ENV_DB_ROOT_PASSWORD || secrets.ENV_DB_PASSWORD }}"
-
-CAMPUS_API_BASE_URL="${{ secrets.ENV_CAMPUS_API_BASE_URL || 'https://bridge.uinssc.ac.id' }}"
-BRIDGE_API_URL="${{ secrets.ENV_BRIDGE_API_URL || 'https://bridge.uinssc.ac.id' }}"
-CAMPUS_API_TIMEOUT=5
-CAMPUS_API_VERIFY_SSL=true
-
-SAHAJA_API_URL="${{ secrets.ENV_SAHAJA_API_URL || 'https://sahaja.uinssc.ac.id' }}"
-SAHAJA_API_KEY="${{ secrets.ENV_SAHAJA_API_KEY }}"
-SAHAJA_API_TIMEOUT=5
-SAHAJA_API_VERIFY_SSL=true
-
-SESSION_DRIVER="file"
-CACHE_STORE="file"
-QUEUE_CONNECTION="sync"
-FILESYSTEM_DISK="local"
-EOF
-
-            # 4. Tulis berkas docker-compose.yml produksi secara otomatis
-            cat << 'COMPOSE_EOF' > docker-compose.yml
-            services:
-              app:
-                image: kenn1213/mahad:latest
-                container_name: simukim_app
-                restart: unless-stopped
-                ports:
-                  - "80:80"
-                env_file:
-                  - .env
-                volumes:
-                  - simukim_storage:/var/www/html/storage/app
-                depends_on:
-                  db:
-                    condition: service_healthy
-                networks:
-                  - simukim_net
-
-              db:
-                image: mysql:8.0
-                container_name: simukim_db
-                restart: unless-stopped
-                command: --default-authentication-plugin=mysql_native_password
-                environment:
-                  MYSQL_DATABASE: ${DB_DATABASE:-mahad_db}
-                  MYSQL_USER: ${DB_USERNAME:-mahad_user}
-                  MYSQL_PASSWORD: ${DB_PASSWORD}
-                  MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_sangat_rahasia}
-                volumes:
-                  - simukim_db_data:/var/lib/mysql
-                networks:
-                  - simukim_net
-                healthcheck:
-                  test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root_sangat_rahasia}"]
-                  interval: 10s
-                  timeout: 5s
-                  retries: 5
-
-            volumes:
-              simukim_storage:
-                name: simukim_storage
-              simukim_db_data:
-                name: simukim_db_data
-
-            networks:
-              simukim_net:
-                name: simukim_net
-            COMPOSE_EOF
+            # 4. Ambil berkas docker-compose.yml terbaru dari repositori
+            curl -fsSL https://raw.githubusercontent.com/akhariss/kp/main/docker-compose.yml -o docker-compose.yml
 
             # 5. Tarik image terbaru dari Docker Hub
             docker compose pull app
