@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Koneksi Terputus — SIMUKIM</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        @media (prefers-color-scheme: dark) {
+            body { background: #0f172a; color: #f8fafc; }
+            .card { background: #1e293b !important; border-color: #334155 !important; }
+            .muted { color: #94a3b8 !important; }
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.25rem;
+            padding: 2.5rem 2rem;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+        .logo {
+            width: 72px;
+            height: auto;
+            margin-bottom: 1.5rem;
+        }
+        h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        p {
+            font-size: 0.925rem;
+            line-height: 1.5;
+            color: #64748b;
+            margin-bottom: 1.75rem;
+        }
+        .btn {
+            display: inline-block;
+            background: #2563eb;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s ease;
+            width: 100%;
+        }
+        .btn:hover { background: #1d4ed8; }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.75rem;
+            background: #fee2e2;
+            color: #b91c1c;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        @media (prefers-color-scheme: dark) {
+            .badge { background: #450a0a; color: #f87171; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img src="/icons/icon-192x192.png" alt="SIMUKIM Logo" class="logo">
+        <div class="badge">
+            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;"></span>
+            Mode Offline
+        </div>
+        <h1>Anda Sedang Tidak Terhubung</h1>
+        <p class="muted">Periksa jaringan internet Anda atau sambungkan kembali ke Wi-Fi / data seluler untuk mengakses SIMUKIM Ma'had Al-Jami'ah.</p>
+        <button class="btn" onclick="window.location.reload()">Coba Muat Ulang</button>
+    </div>
+</body>
+</html>
+
