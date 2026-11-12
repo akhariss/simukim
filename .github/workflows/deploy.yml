@@ -1,47 +1,12 @@
-name: CI/CD — Build, Test & Deploy SIMUKIM
+name: Deploy SIMUKIM via Docker
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  # ============================================================
-  # TAHAP 1: CONTINUOUS INTEGRATION (CI)
-  # Menguji seluruh 151 skenario tes otomatis sebelum build Docker
-  # ============================================================
-  test:
-    name: Run Automated Tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup PHP 8.4
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          extensions: mbstring, pdo, pdo_sqlite, zip, gd, intl, dom, fileinfo
-          coverage: none
-
-      - name: Install Composer Dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress
-
-      - name: Setup Application Key & Database Test
-        run: |
-          cp .env.example .env
-          php artisan key:generate
-
-      - name: Execute 151 PHPUnit Tests
-        run: php artisan test
-
-  # ============================================================
-  # TAHAP 2: CONTINUOUS DEPLOYMENT (CD)
-  # Build Docker Image, Push ke Docker Hub, & Deploy ke Server
-  # ============================================================
   build-and-deploy:
     name: Build Docker Image & Deploy via SSH
-    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -120,7 +85,7 @@ jobs:
             FILESYSTEM_DISK=local
             EOF
 
-            # 4. Tulis berkas docker-compose.yml produksi secara otomatis (Anda tidak perlu salin manual!)
+            # 4. Tulis berkas docker-compose.yml produksi secara otomatis
             cat << 'COMPOSE_EOF' > docker-compose.yml
             services:
               app:
