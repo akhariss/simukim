@@ -16,7 +16,7 @@ RUN npm run build
 # ===================================================
 # STAGE 2: PHP Application & Nginx Runtime Environment
 # ===================================================
-FROM php:8.3-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 # Install system dependencies & libraries
 RUN apk add --no-cache \
