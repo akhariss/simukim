@@ -3,7 +3,7 @@
   "name": "SIMUKIM — Sistem Informasi Mahasantri Mukim",
   "short_name": "SIMUKIM",
   "description": "Sistem Informasi Manajemen Keasramaan dan Mahasantri Mukim Ma'had Al-Jami'ah UIN Siber Syekh Nurjati Cirebon",
-  "start_url": "/login",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],

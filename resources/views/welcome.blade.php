@@ -9,6 +9,54 @@
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=2">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v=2">
 
+    <!-- PWA & Mobile Web App Meta Tags -->
+    <link rel="manifest" href="{{ secure_asset('manifest.json') }}">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SIMUKIM">
+    <link rel="apple-touch-icon" href="{{ secure_asset('icons/icon-192x192.png') }}">
+
+    <!-- Service Worker Registration & PWA Install Engine -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('SIMUKIM SW registered:', reg.scope))
+                    .catch(err => console.warn('SIMUKIM SW failed:', err));
+            });
+        }
+
+        let deferredPwaPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPwaPrompt = e;
+            window.dispatchEvent(new CustomEvent('pwa-ready'));
+        });
+
+        window.installPWA = function() {
+            if (deferredPwaPrompt) {
+                deferredPwaPrompt.prompt();
+                deferredPwaPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User installed SIMUKIM PWA');
+                    }
+                    deferredPwaPrompt = null;
+                });
+            } else {
+                const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (isIos) {
+                    alert("Untuk menginstall di iPhone/iPad:\n1. Ketuk tombol 'Share/Bagikan' di browser Safari (ikon kotak berpanah atas di bagian bawah layar).\n2. Gulir ke bawah lalu pilih 'Tambah ke Layar Utama' (Add to Home Screen).");
+                } else if (window.matchMedia('(display-mode: standalone)').matches) {
+                    alert("Aplikasi SIMUKIM sudah terpasang di perangkat Anda!");
+                } else {
+                    alert("Untuk mengunduh/memasang aplikasi di HP:\n1. Buka menu browser Anda (ikon titik tiga di pojok kanan atas).\n2. Pilih 'Pasang aplikasi' atau 'Tambahkan ke Layar Utama' (Add to Home screen).");
+                }
+            }
+        };
+    </script>
+
     <!-- Fonts: Local Self-Hosted Preload (0ms external network delay) -->
     <link rel="preload" href="/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>

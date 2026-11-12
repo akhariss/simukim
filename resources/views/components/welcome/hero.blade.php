@@ -52,6 +52,18 @@
                 <span>Pelajari Modul Sistem</span>
                 <svg class="size-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
             </a>
+
+            <!-- Tombol Pasang / Unduh Aplikasi PWA -->
+            <button
+                type="button"
+                onclick="window.installPWA()"
+                class="w-full sm:w-auto px-5 py-2.5 rounded-xl font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200/90 dark:border-blue-800 shadow-2xs transition-all text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer"
+            >
+                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Unduh / Pasang Aplikasi</span>
+            </button>
         </div>
 
         <!-- Autoplay Animated Feature Console (Otomatis ganti slide secara berkala) -->

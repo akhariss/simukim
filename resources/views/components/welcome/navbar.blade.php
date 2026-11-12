@@ -44,6 +44,19 @@
                 </svg>
             </button>
 
+            <!-- Tombol Pasang / Unduh PWA (Desktop) -->
+            <button
+                type="button"
+                onclick="window.installPWA()"
+                class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200/80 dark:border-blue-800 transition-colors cursor-pointer"
+                title="Unduh & Pasang Aplikasi SIMUKIM"
+            >
+                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Unduh App</span>
+            </button>
+
             <!-- Auth Button (Desktop) -->
             @if (Route::has('login'))
                 @auth
@@ -107,7 +120,18 @@
             <a @click="mobileMenuOpen = false" href="#peran" class="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/70 border border-slate-200/60 dark:border-slate-700/60">Akses Peran</a>
             <a @click="mobileMenuOpen = false" href="#keunggulan" class="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/70 border border-slate-200/60 dark:border-slate-700/60">Keunggulan</a>
         </div>
-        <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
+        <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+            <!-- Unduh App (Mobile) -->
+            <button
+                type="button"
+                onclick="window.installPWA(); mobileMenuOpen = false;"
+                class="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 cursor-pointer"
+            >
+                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Unduh / Pasang Aplikasi (PWA)</span>
+            </button>
             @auth
                 <a href="{{ route('dashboard') }}" data-no-spa class="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600">
                     <span>Buka Dashboard Utama</span>
