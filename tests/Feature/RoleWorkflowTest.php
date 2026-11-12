@@ -204,4 +204,44 @@ class RoleWorkflowTest extends TestCase
             'bobot' => 30.0,
         ]);
     }
+
+    public function test_tutor_or_admin_can_update_grading_component_name_and_weight(): void
+    {
+        $kelas = Kelas::create([
+            'periode_id' => $this->periode->id,
+            'nama' => 'Hadis Tematik',
+            'tipe' => 'kitab',
+            'is_active' => true,
+        ]);
+
+        $komponen = KelasKomponenNilai::create([
+            'kelas_id' => $kelas->id,
+            'nama' => 'Tugas Awal',
+            'bobot' => 20.0,
+            'is_absensi' => false,
+            'is_fixed' => false,
+            'urutan' => 1,
+        ]);
+
+        $response = $this->actingAs($this->tutor)->put(route('kelas.nilai.komponen.update', $komponen), [
+            'nama' => 'Tugas Mandiri & Resume',
+            'bobot' => 35.5,
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('mahad_kelas_komponen_nilai', [
+            'id' => $komponen->id,
+            'nama' => 'Tugas Mandiri & Resume',
+            'bobot' => 35.5,
+        ]);
+    }
+
+    public function test_nilai_export_supports_excel_and_pdf(): void
+    {
+        $responseExcel = $this->actingAs($this->admin)->get(route('kelas.nilai.export', ['format' => 'excel']));
+        $responseExcel->assertOk();
+
+        $responsePdf = $this->actingAs($this->admin)->get(route('kelas.nilai.export', ['format' => 'pdf']));
+        $responsePdf->assertOk();
+    }
 }

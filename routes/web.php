@@ -160,6 +160,7 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/nilai/{penilaian}', [\App\Http\Controllers\Kelas\KelolaKelasNilaiController::class, 'update'])->name('nilai.update')->middleware(['role:admin|tutor']);
             Route::post('/nilai/{kelompok}/{kelas}/bulk', [\App\Http\Controllers\Kelas\KelolaKelasNilaiController::class, 'bulkUpdate'])->name('nilai.bulk')->middleware(['role:admin|tutor']);
             Route::post('/nilai/komponen', [\App\Http\Controllers\Kelas\KelolaKelasNilaiController::class, 'storeKomponen'])->name('nilai.komponen.store')->middleware(['role:admin|tutor']);
+            Route::put('/nilai/komponen/{komponen}', [\App\Http\Controllers\Kelas\KelolaKelasNilaiController::class, 'updateKomponen'])->name('nilai.komponen.update')->middleware(['role:admin|tutor']);
             Route::delete('/nilai/komponen/{komponen}', [\App\Http\Controllers\Kelas\KelolaKelasNilaiController::class, 'destroyKomponen'])->name('nilai.komponen.destroy')->middleware(['role:admin|tutor']);
 
             // Laporan Bulanan Tutor

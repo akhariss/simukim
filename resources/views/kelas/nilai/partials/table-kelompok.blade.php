@@ -40,7 +40,7 @@
                         </td>
                         <td class="px-4 py-3.5 text-right">
                             <a href="{{ route('kelas.nilai.index', array_filter(['kelompok_id' => $k->kelompok_id, 'kelas_id' => $k->kelas_id, 'mode' => request('mode')])) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-400 transition cursor-pointer">
-                                <span>Kelola Nilai</span>
+                                <span>{{ ($isBinaan ?? false) ? 'Kelola Nilai' : 'Detail Nilai' }}</span>
                                 <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                             </a>
                         </td>
@@ -78,7 +78,7 @@
                 </div>
                 <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs">
                     <span class="text-slate-400 text-[11px]">{{ $k->total_santri }} Santri Terdaftar</span>
-                    <a href="{{ route('kelas.nilai.index', array_filter(['kelompok_id' => $k->kelompok_id, 'kelas_id' => $k->kelas_id, 'mode' => request('mode')])) }}" class="font-bold text-blue-600 hover:underline">Kelola Nilai &rarr;</a>
+                    <a href="{{ route('kelas.nilai.index', array_filter(['kelompok_id' => $k->kelompok_id, 'kelas_id' => $k->kelas_id, 'mode' => request('mode')])) }}" class="font-bold text-blue-600 hover:underline">{{ ($isBinaan ?? false) ? 'Kelola Nilai' : 'Detail Nilai' }} &rarr;</a>
                 </div>
             </div>
         @empty

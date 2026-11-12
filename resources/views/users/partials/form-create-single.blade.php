@@ -138,9 +138,9 @@
 
             <!-- PASSWORD KHUSUS AKUN LOKAL -->
             <div class="space-y-1" x-show="authSource === 'local'" x-cloak>
-                <label for="password" class="block text-xs font-bold text-slate-800 dark:text-slate-200">Kata Sandi Lokal <span class="text-slate-400 font-normal">(Kosongkan untuk default: user)</span></label>
+                <label for="password" class="block text-xs font-bold text-slate-800 dark:text-slate-200">Kata Sandi Lokal <span class="text-slate-400 font-normal">(Kosongkan untuk default: password)</span></label>
                 <div class="relative">
-                    <input id="password" :type="showPassword ? 'text' : 'password'" name="password" placeholder="Kosongkan untuk default: user"
+                    <input id="password" :type="showPassword ? 'text' : 'password'" name="password" placeholder="Kosongkan untuk default: password"
                         class="w-full text-xs rounded-xl pl-3 pr-8 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition outline-none">
                     <button type="button" @click="showPassword = !showPassword" class="absolute right-0 top-0 bottom-0 px-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition flex items-center justify-center cursor-pointer" tabindex="-1">
                         <span x-text="showPassword ? '🙈' : '👁️'" class="text-xs"></span>

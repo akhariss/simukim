@@ -34,13 +34,23 @@
                             <svg class="size-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             <span>Ekspor Excel</span>
                         </a>
+                        <a
+                            href="{{ route('kelas.nilai.export', ['format' => 'pdf', 'kelompok_id' => $selectedKelompok->id, 'kelas_id' => $selectedKelas->id]) }}"
+                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 transition shadow-2xs"
+                        >
+                            <svg class="size-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            <span>Ekspor PDF</span>
+                        </a>
                     </div>
                 </x-slot:actions>
             </x-page-header>
 
             {{-- Form Spreadsheet Nilai Massal --}}
             <form method="POST" action="{{ route('kelas.nilai.bulk', array_filter([$selectedKelompok, $selectedKelas, 'mode' => request('mode')])) }}"
-                x-data="{ isMobile: window.innerWidth < 768 }"
+                x-data="{
+                    isMobile: window.innerWidth < 768,
+                    isEdit: {{ (Auth::user()->hasRole('admin') && request('mode') !== 'saya') ? 'false' : 'true' }}
+                }"
                 x-init="window.addEventListener('resize', () => isMobile = window.innerWidth < 768)">
                 @csrf
                 <x-table-container>
@@ -51,10 +61,37 @@
                                 <span>&bull;</span>
                                 <span class="text-blue-600 dark:text-blue-400 font-medium">Presensi otomatis dari {{ $totalSesi }} sesi pertemuan</span>
                             </div>
-                            <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-98 rounded-xl transition shadow-xs cursor-pointer flex items-center gap-1.5">
-                                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <span>Simpan Rekapitulasi Nilai</span>
-                            </button>
+
+                            <div class="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    x-show="!isEdit"
+                                    @click="isEdit = true"
+                                    class="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-98 rounded-xl transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                                >
+                                    <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                    <span>Edit Nilai</span>
+                                </button>
+
+                                <div x-show="isEdit" class="flex items-center gap-2">
+                                    @if(Auth::user()->hasRole('admin') && request('mode') !== 'saya')
+                                        <button
+                                            type="button"
+                                            @click="isEdit = false"
+                                            class="px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 rounded-xl transition cursor-pointer"
+                                        >
+                                            Batal
+                                        </button>
+                                    @endif
+                                    <button
+                                        type="submit"
+                                        class="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-98 rounded-xl transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <span>Simpan Rekapitulasi Nilai</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </x-slot:toolbar>
 
@@ -92,22 +129,27 @@
                                             @foreach($komponenList as $komp)
                                                 <td class="px-3 py-2.5 text-center">
                                                     @if($komp->is_absensi)
-                                                        <input type="hidden" name="nilai[{{ $santri->id }}][komponen][{{ $komp->id }}]" value="{{ $autoAbs }}" :disabled="isMobile">
+                                                        <input type="hidden" name="nilai[{{ $santri->id }}][komponen][{{ $komp->id }}]" value="{{ $autoAbs }}" :disabled="isMobile || !isEdit">
                                                         <span class="inline-flex px-2 py-1 rounded-lg text-xs font-mono font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200/60" title="Kehadiran: {{ $autoAbs }}%">
                                                             {{ $autoAbs }}%
                                                         </span>
                                                     @else
-                                                        <input
-                                                            type="number"
-                                                            step="0.5"
-                                                            min="0"
-                                                            max="100"
-                                                            name="nilai[{{ $santri->id }}][komponen][{{ $komp->id }}]"
-                                                            value="{{ $nilai?->nilai_komponen[$komp->id] ?? '' }}"
-                                                            placeholder="0-100"
-                                                            :disabled="isMobile"
-                                                            class="w-18 text-center px-2 py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                                                        />
+                                                        <div x-show="!isEdit" class="font-bold font-mono text-slate-800 dark:text-slate-200">
+                                                            {{ $nilai?->nilai_komponen[$komp->id] !== null && $nilai?->nilai_komponen[$komp->id] !== '' ? $nilai->nilai_komponen[$komp->id] : '-' }}
+                                                        </div>
+                                                        <div x-show="isEdit">
+                                                            <input
+                                                                type="number"
+                                                                step="0.5"
+                                                                min="0"
+                                                                max="100"
+                                                                name="nilai[{{ $santri->id }}][komponen][{{ $komp->id }}]"
+                                                                value="{{ $nilai?->nilai_komponen[$komp->id] ?? '' }}"
+                                                                placeholder="0-100"
+                                                                :disabled="isMobile || !isEdit"
+                                                                class="w-18 text-center px-2 py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                                            />
+                                                        </div>
                                                     @endif
                                                 </td>
                                             @endforeach
@@ -120,14 +162,19 @@
                                                 </span>
                                             </td>
                                             <td class="px-3 py-2.5">
-                                                <input
-                                                    type="text"
-                                                    name="nilai[{{ $santri->id }}][catatan]"
-                                                    value="{{ $nilai?->catatan }}"
-                                                    placeholder="Evaluasi..."
-                                                    :disabled="isMobile"
-                                                    class="w-full px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                                                />
+                                                <div x-show="!isEdit" class="text-xs text-slate-600 dark:text-slate-400">
+                                                    {{ $nilai?->catatan ?: '-' }}
+                                                </div>
+                                                <div x-show="isEdit">
+                                                    <input
+                                                        type="text"
+                                                        name="nilai[{{ $santri->id }}][catatan]"
+                                                        value="{{ $nilai?->catatan }}"
+                                                        placeholder="Evaluasi..."
+                                                        :disabled="isMobile || !isEdit"
+                                                        class="w-full px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                                    />
+                                                </div>
                                             </td>
                                         </tr>
                                     @empty
@@ -156,16 +203,26 @@
                                             <div>
                                                 <span class="text-[10px] text-slate-500">{{ $komp->nama }} ({{ $komp->bobot }}%)</span>
                                                 @if($komp->is_absensi)
-                                                    <input type="hidden" name="nilai[{{ $santri->id }}][komponen][{{ $komp->id }}]" value="{{ $autoAbs }}" :disabled="!isMobile">
+                                                    <input type="hidden" name="nilai[{{ $santri->id }}][komponen][{{ $komp->id }}]" value="{{ $autoAbs }}" :disabled="!isMobile || !isEdit">
                                                     <p class="font-bold text-blue-600 font-mono">{{ $autoAbs }}%</p>
                                                 @else
-                                                    <input type="number" step="0.5" min="0" max="100" name="nilai[{{ $santri->id }}][komponen][{{ $komp->id }}]" value="{{ $nilai?->nilai_komponen[$komp->id] ?? '' }}" :disabled="!isMobile" class="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                                                    <div x-show="!isEdit" class="font-bold font-mono text-slate-800 dark:text-slate-200 py-1">
+                                                        {{ $nilai?->nilai_komponen[$komp->id] !== null && $nilai?->nilai_komponen[$komp->id] !== '' ? $nilai->nilai_komponen[$komp->id] : '-' }}
+                                                    </div>
+                                                    <div x-show="isEdit">
+                                                        <input type="number" step="0.5" min="0" max="100" name="nilai[{{ $santri->id }}][komponen][{{ $komp->id }}]" value="{{ $nilai?->nilai_komponen[$komp->id] ?? '' }}" :disabled="!isMobile || !isEdit" class="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                                                    </div>
                                                 @endif
                                             </div>
                                         @endforeach
                                     </div>
                                     <div>
-                                        <input type="text" name="nilai[{{ $santri->id }}][catatan]" value="{{ $nilai?->catatan }}" placeholder="Catatan evaluasi..." :disabled="!isMobile" class="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                                        <div x-show="!isEdit" class="text-xs text-slate-600 dark:text-slate-400 py-1">
+                                            {{ $nilai?->catatan ?: '-' }}
+                                        </div>
+                                        <div x-show="isEdit">
+                                            <input type="text" name="nilai[{{ $santri->id }}][catatan]" value="{{ $nilai?->catatan }}" placeholder="Catatan evaluasi..." :disabled="!isMobile || !isEdit" class="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                                        </div>
                                     </div>
                                 </div>
                             @empty

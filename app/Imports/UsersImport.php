@@ -71,7 +71,7 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation
                 $status   = trim((string) ($row['status'] ?? '')) ?: ($api['status'] ?? 'aktif');
 
                 $rawPassword = trim((string) ($row['password'] ?? ''));
-                $password = $rawPassword ?: 'user';
+                $password = $rawPassword ?: 'password';
 
                 $user = User::create([
                     'name'              => $nama,

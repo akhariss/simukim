@@ -26,12 +26,13 @@ class AbsensiController extends Controller
         $user = Auth::user();
         $periode = Periode::getActive();
         $hasSelected = $request->filled('kelompok_id') && $request->filled('kelas_id');
+        $isSaya = $request->query('mode') === 'saya' || ($user->hasRole('tutor') && !$user->hasRole('admin'));
 
         $query = DB::table('mahad_kelompok_pengampu')
             ->join('mahad_kelompok', 'mahad_kelompok_pengampu.kelompok_id', '=', 'mahad_kelompok.id')
             ->join('mahad_kelas', 'mahad_kelompok_pengampu.kelas_id', '=', 'mahad_kelas.id')
             ->where('mahad_kelompok.periode_id', $periode?->id)
-            ->when($user->hasRole('tutor') && !$user->hasRole('admin'), fn ($q) => $q->where('mahad_kelompok_pengampu.tutor_id', $user->id));
+            ->when($isSaya, fn ($q) => $q->where('mahad_kelompok_pengampu.tutor_id', $user->id));
 
         $rawList = $query->select(
             'mahad_kelompok.id as kelompok_id',
@@ -205,18 +206,33 @@ class AbsensiController extends Controller
         $periode = Periode::getActive();
         $bulan = (int) $request->query('bulan', Carbon::now()->month);
         $tahun = (int) $request->query('tahun', Carbon::now()->year);
+        $isTutorOnly = ($user->hasRole('tutor') && !$user->hasRole('admin')) || $request->query('mode') === 'saya';
 
         $kelompokQuery = Kelompok::where('periode_id', $periode?->id)->where('is_active', true);
-        if ($user->hasRole('tutor') && !$user->hasRole('admin')) {
+        if ($isTutorOnly) {
             $kelompokQuery->whereHas('pengampu', fn ($q) => $q->where('tutor_id', $user->id));
         }
         $kelompokList = $kelompokQuery->orderBy('nama')->get();
         $selectedKelompokId = (int) $request->query('kelompok_id', $kelompokList->first()?->id ?? 0);
         $selectedKelompok = $kelompokList->firstWhere('id', $selectedKelompokId);
 
+        if ($selectedKelompok && $isTutorOnly) {
+            $isPengampu = DB::table('mahad_kelompok_pengampu')
+                ->where('kelompok_id', $selectedKelompok->id)
+                ->where('tutor_id', $user->id)
+                ->exists();
+            if (!$isPengampu) {
+                $selectedKelompok = $kelompokList->first();
+            }
+        }
+
         $kelasListQuery = Kelas::where('periode_id', $periode?->id)->where('is_active', true);
-        if ($user->hasRole('tutor') && !$user->hasRole('admin') && $selectedKelompok) {
-            $kelasListQuery->whereHas('pengampu', fn ($q) => $q->where('kelompok_id', $selectedKelompok->id)->where('tutor_id', $user->id));
+        if ($isTutorOnly) {
+            if ($selectedKelompok) {
+                $kelasListQuery->whereHas('pengampu', fn ($q) => $q->where('kelompok_id', $selectedKelompok->id)->where('tutor_id', $user->id));
+            } else {
+                $kelasListQuery->whereHas('pengampu', fn ($q) => $q->where('tutor_id', $user->id));
+            }
         }
         $kelasList = $kelasListQuery->orderBy('tipe')->get();
         $selectedKelasId = (int) $request->query('kelas_id', $kelasList->first()?->id ?? 0);

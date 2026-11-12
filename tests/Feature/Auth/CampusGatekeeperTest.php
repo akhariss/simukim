@@ -200,5 +200,6 @@ class CampusGatekeeperTest extends TestCase
         ]);
         $u = User::where('nomor_induk', '240199999')->first();
         $this->assertTrue($u->hasRole('mudabbir'));
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('password', $u->password));
     }
 }

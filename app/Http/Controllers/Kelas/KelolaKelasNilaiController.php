@@ -197,6 +197,21 @@ class KelolaKelasNilaiController extends Controller
         return back()->with('success', "Komponen nilai '{$v['nama']}' berhasil ditambahkan.");
     }
 
+    public function updateKomponen(Request $request, KelasKomponenNilai $komponen): RedirectResponse
+    {
+        $v = $request->validate([
+            'nama'  => 'required|string|max:100',
+            'bobot' => 'required|numeric|min:0|max:100',
+        ]);
+
+        $komponen->update([
+            'nama'  => trim($v['nama']),
+            'bobot' => (float) $v['bobot'],
+        ]);
+
+        return back()->with('success', "Komponen penilaian '{$komponen->nama}' berhasil diperbarui.");
+    }
+
     public function destroyKomponen(KelasKomponenNilai $komponen): RedirectResponse
     {
         if ($komponen->is_absensi || $komponen->is_fixed) {

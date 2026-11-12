@@ -62,11 +62,12 @@ $roleMenuGroups = [
         ],
         $adminIsTeaching ? 'Kelas Saya' : null => $adminIsTeaching ? [
             ['name' => 'Kelas Saya', 'route' => 'tutor.kajian.index', 'prefix' => 'tutor.kajian.*', 'icon' => $icKajian],
-            ['name' => 'Presensi', 'route' => 'kelas.absensi.index', 'params' => ['mode' => 'saya'], 'is_active' => fn() => request()->routeIs('kelas.absensi.*') && request('mode') === 'saya', 'icon' => $icPresensi],
+            ['name' => 'Presensi', 'route' => 'kelas.absensi.index', 'params' => ['mode' => 'saya'], 'is_active' => fn() => request()->routeIs('kelas.absensi.index') && request('mode') === 'saya', 'icon' => $icPresensi],
+            ['name' => 'Rekap Presensi', 'route' => 'kelas.absensi.rekap', 'params' => ['mode' => 'saya'], 'is_active' => fn() => request()->routeIs('kelas.absensi.rekap') && request('mode') === 'saya', 'icon' => $icPresensi],
             ['name' => 'Laporan Bulanan', 'route' => 'kelas.laporan.index', 'params' => ['mode' => 'saya'], 'is_active' => fn() => request()->routeIs('kelas.laporan.*') && request('mode') === 'saya', 'icon' => $icLaporan],
         ] : null,
         'Manajemen Kajian' => [
-            ['name' => 'Rekap Presensi', 'route' => 'kelas.absensi.index', 'prefix' => 'kelas.absensi.*', 'icon' => $icPresensi],
+            ['name' => 'Rekap Presensi', 'route' => 'kelas.absensi.rekap', 'is_active' => fn() => request()->routeIs('kelas.absensi.rekap') && request('mode') !== 'saya', 'icon' => $icPresensi],
             ['name' => 'Rekap Nilai', 'route' => 'kelas.nilai.index', 'is_active' => fn() => request()->routeIs('kelas.nilai.*') && request('mode') !== 'saya', 'icon' => $icNilai],
             ['name' => 'Review Laporan', 'route' => 'kelas.laporan.index', 'is_active' => fn() => request()->routeIs('kelas.laporan.*') && request('mode') !== 'saya', 'icon' => $icLaporan],
             ['name' => 'Kelompok Kajian', 'route' => 'kelompok.index', 'prefix' => 'kelompok.*', 'icon' => $icPenempatan],
@@ -85,7 +86,8 @@ $roleMenuGroups = [
         ],
         'Kelas Saya' => [
             ['name' => 'Kelas Saya', 'route' => 'tutor.kajian.index', 'prefix' => 'tutor.kajian.*', 'icon' => $icKajian],
-            ['name' => 'Presensi', 'route' => 'kelas.absensi.index', 'prefix' => 'kelas.absensi.*', 'icon' => $icPresensi],
+            ['name' => 'Presensi', 'route' => 'kelas.absensi.index', 'prefix' => 'kelas.absensi.index', 'icon' => $icPresensi],
+            ['name' => 'Rekap Presensi', 'route' => 'kelas.absensi.rekap', 'prefix' => 'kelas.absensi.rekap', 'icon' => $icPresensi],
             ['name' => 'Laporan Bulanan', 'route' => 'kelas.laporan.index', 'prefix' => 'kelas.laporan.*', 'icon' => $icLaporan],
         ],
         'Kedisiplinan' => [
