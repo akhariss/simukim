@@ -1,0 +1,24 @@
+{
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "SIMUKIM Ma'had Al-Jami'ah",
+      "weight": "Bolder",
+      "size": "Medium"
+    },
+    {
+      "type": "TextBlock",
+      "text": "${statusMessage}",
+      "wrap": true
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "Buka SIMUKIM",
+      "url": "https://konfigura.my.id/login"
+    }
+  ]
+}
