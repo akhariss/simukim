@@ -20,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (app()->environment('production') || request()->header('x-forwarded-proto') === 'https' || str_starts_with(config('app.url'), 'https://')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         Gate::policy(\App\Models\Kelas::class, \App\Policies\KelasPolicy::class);
         Gate::policy(\App\Models\Kamar::class, \App\Policies\KamarPolicy::class);
         Gate::policy(\App\Models\PenempatanKamar::class, \App\Policies\PenempatanKamarPolicy::class);
