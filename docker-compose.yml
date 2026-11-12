@@ -1,0 +1,47 @@
+services:
+  app:
+    image: kenn1213/mahad:latest
+    container_name: simukim_app
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    env_file:
+      - .env
+    volumes:
+      - simukim_storage:/var/www/html/storage/app
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - simukim_net
+
+  db:
+    image: mysql:8.0
+    container_name: simukim_db
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-mahad_db}
+      MYSQL_USER: ${DB_USERNAME:-mahad_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password_db_rahasia}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_sangat_rahasia}
+    volumes:
+      - simukim_db_data:/var/lib/mysql
+    networks:
+      - simukim_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root_sangat_rahasia}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  simukim_storage:
+    name: simukim_storage
+  simukim_db_data:
+    name: simukim_db_data
+
+networks:
+  simukim_net:
+    name: simukim_net
+

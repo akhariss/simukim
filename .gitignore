@@ -1,0 +1,62 @@
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.crt
+*.cer
+
+# Cookies & Session Artifacts
+*.cookie
+*cookie*.txt
+s_cookie.txt
+
+# Ad-hoc Scratch & Debug Scripts
+test_*.php
+check_*.php
+test_*.txt
+
+# Logs & Diagnostics
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database Dumps & SQLite
+*.sql
+*.sqlite
+*.sqlite-journal
+*.dump
+
+# Framework, Cache & Build Assets
+/.phpunit.cache
+.phpunit.result.cache
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/storage/logs/*.log
+/vendor
+Homestead.json
+Homestead.yaml
+/auth.json
+
+# IDE & OS Metadata
+.DS_Store
+Thumbs.db
+.phpactor.json
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+
+# Local Windows Launchers & Scripts (Dev-only)
+start.bat
+start.ps1
+stop.bat
+*.bat
+*.ps1

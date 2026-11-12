@@ -1,0 +1,25 @@
+<?php
+
+namespace App\View\Components;
+
+use Illuminate\View\Component;
+use Illuminate\View\View;
+
+class AppLayout extends Component
+{
+    public function __construct(
+        public ?string $title = null
+    ) {}
+
+    /**
+     * Get the view / contents that represents the component.
+     */
+    public function render(): View
+    {
+        if (request()->header('X-SPA-Navigation') === 'true') {
+            return view('layouts.partial');
+        }
+
+        return view('layouts.app');
+    }
+}
