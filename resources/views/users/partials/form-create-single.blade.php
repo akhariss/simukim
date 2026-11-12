@@ -119,15 +119,15 @@
                 </div>
             </div>
 
-            <!-- PROGRAM STUDI / UNIT -->
-            <div class="space-y-1">
-                <label for="prodi" class="block text-xs font-bold text-slate-800 dark:text-slate-200">Prodi / Unit <span class="text-slate-400 font-normal">(Opsional)</span></label>
+            <!-- PROGRAM STUDI / JURUSAN (KHUSUS MAHASANTRI & MUDABBIR) -->
+            <div class="space-y-1" x-show="role === 'mahasantri' || role === 'mudabbir'">
+                <label for="prodi" class="block text-xs font-bold text-slate-800 dark:text-slate-200">Prodi / Jurusan <span class="text-slate-400 font-normal">(Opsional)</span></label>
                 <input id="prodi" type="text" name="prodi" x-model="prodi" placeholder="Contoh: Pendidikan Agama Islam"
                     class="w-full text-xs rounded-xl px-3 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition outline-none">
             </div>
 
             <!-- EMAIL RESMI -->
-            <div class="space-y-1" :class="authSource === 'local' ? '' : 'sm:col-span-2'">
+            <div class="space-y-1" :class="authSource === 'local' ? '' : (role === 'tutor' || role === 'admin' ? 'sm:col-span-2' : '')">
                 <label for="email" class="block text-xs font-bold text-slate-800 dark:text-slate-200">
                     Email Resmi <span class="text-slate-400 font-normal" x-show="authSource === 'campus'">(Opsional SSO)</span><span class="text-rose-500" x-show="authSource === 'local'">*</span>
                 </label>
@@ -138,9 +138,9 @@
 
             <!-- PASSWORD KHUSUS AKUN LOKAL -->
             <div class="space-y-1" x-show="authSource === 'local'" x-cloak>
-                <label for="password" class="block text-xs font-bold text-slate-800 dark:text-slate-200">Kata Sandi Lokal <span class="text-rose-500">*</span></label>
+                <label for="password" class="block text-xs font-bold text-slate-800 dark:text-slate-200">Kata Sandi Lokal <span class="text-slate-400 font-normal">(Kosongkan untuk default: user)</span></label>
                 <div class="relative">
-                    <input id="password" :type="showPassword ? 'text' : 'password'" name="password" :required="authSource === 'local'" placeholder="Minimal 6 karakter"
+                    <input id="password" :type="showPassword ? 'text' : 'password'" name="password" placeholder="Kosongkan untuk default: user"
                         class="w-full text-xs rounded-xl pl-3 pr-8 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition outline-none">
                     <button type="button" @click="showPassword = !showPassword" class="absolute right-0 top-0 bottom-0 px-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition flex items-center justify-center cursor-pointer" tabindex="-1">
                         <span x-text="showPassword ? '🙈' : '👁️'" class="text-xs"></span>

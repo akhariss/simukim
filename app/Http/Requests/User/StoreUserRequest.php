@@ -23,7 +23,7 @@ class StoreUserRequest extends FormRequest
             'prodi' => ['nullable', 'string', 'max:150'],
             'angkatan' => ['nullable', 'string', 'max:10'],
             'no_hp' => ['nullable', 'string', 'max:25'],
-            'password' => ['required_if:auth_source,local', 'nullable', 'string', 'min:6'],
+            'password' => ['nullable', 'string', 'min:4'],
         ];
     }
 
@@ -35,8 +35,7 @@ class StoreUserRequest extends FormRequest
             'nomor_induk.unique' => 'Nomor Induk ini sudah terdaftar di sistem Ma\'had.',
             'name.required' => 'Nama lengkap pengguna wajib diisi.',
             'email.unique' => 'Alamat email ini sudah terdaftar.',
-            'password.required_if' => 'Kata sandi wajib diisi untuk akun lokal mandiri.',
-            'password.min' => 'Kata sandi minimal 6 karakter.',
+            'password.min' => 'Kata sandi minimal 4 karakter.',
         ];
     }
 }

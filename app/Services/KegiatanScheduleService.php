@@ -27,46 +27,54 @@ class KegiatanScheduleService
             ->when($search !== '', fn($q) => $q->where(fn($sub) => $sub->where('nama', 'like', "%{$search}%")->orWhere('deskripsi', 'like', "%{$search}%")));
 
         $allActiveKelas = $kelasListQuery->get();
-        $isMahasantri = $user && ($user->hasRole('mahasantri') || ($user->santri && !$user->hasAnyRole(['admin', 'tutor'])));
+        $isAdminOrMudabbir = $user && $user->hasAnyRole(['admin', 'mudabbir']);
         $isTutor = $user && $user->hasRole('tutor') && !$user->hasRole('admin');
+        $isMahasantri = $user && ($user->hasRole('mahasantri') || ($user->santri && !$user->hasAnyRole(['admin', 'mudabbir', 'tutor'])));
 
         // 1. Konteks Mahasantri: Tampilkan jadwal khusus kelompoknya sendiri
-        if ($isMahasantri && $user->santri && $activePeriode) {
-            $myKelompok = Kelompok::where('periode_id', $activePeriode->id)
-                ->whereHas('anggota', fn($q) => $q->where('santri_id', $user->santri->id))
-                ->with(['pengampu.tutor', 'pengampu.kelas'])
-                ->first();
+        if ($isMahasantri) {
+            if ($user->santri && $activePeriode) {
+                $myKelompok = Kelompok::where('periode_id', $activePeriode->id)
+                    ->whereHas('anggota', fn($q) => $q->where('santri_id', $user->santri->id))
+                    ->with(['pengampu.tutor', 'pengampu.kelas'])
+                    ->first();
 
-            if ($myKelompok) {
-                $res = collect();
-                foreach ($allActiveKelas as $k) {
-                    $p = $myKelompok->pengampu->firstWhere('kelas_id', $k->id);
-                    $tutorName = $p?->tutor?->name ?? ($k->tipe?->value === 'masal' ? 'Tutor Pengampu' : 'Belum Ditunjuk');
-                    $this->appendSesiItems($res, $k, " ({$myKelompok->nama})", $tutorName, $myKelompok->nama, route('kelompok.show', $myKelompok));
+                if ($myKelompok) {
+                    $res = collect();
+                    foreach ($allActiveKelas as $k) {
+                        $p = $myKelompok->pengampu->firstWhere('kelas_id', $k->id);
+                        $tutorName = $p?->tutor?->name ?? ($k->tipe?->value === 'masal' ? 'Tutor Pengampu' : 'Belum Ditunjuk');
+                        $this->appendSesiItems($res, $k, " ({$myKelompok->nama})", $tutorName, $myKelompok->nama, route('kelompok.show', $myKelompok));
+                    }
+                    return $res;
                 }
-                return $res;
             }
+            return collect(); // Mahasantri tidak melihat kelas kelompok lain
         }
 
-        // 2. Konteks Tutor: Tampilkan hanya kelas & kelompok yang diampunya
-        if ($isTutor && $activePeriode) {
-            $myPengampu = KelompokPengampu::where('tutor_id', $user->id)
-                ->whereHas('kelompok', fn($q) => $q->where('periode_id', $activePeriode->id))
-                ->with(['kelompok', 'kelas.jadwal'])
-                ->get();
+        // 2. Konteks Tutor: Tampilkan HANYA kelas & kelompok yang diampunya
+        if ($isTutor) {
+            if ($activePeriode) {
+                $myPengampu = KelompokPengampu::where('tutor_id', $user->id)
+                    ->whereHas('kelompok', fn($q) => $q->where('periode_id', $activePeriode->id))
+                    ->with(['kelompok', 'kelas.jadwal'])
+                    ->get();
 
-            if ($myPengampu->isNotEmpty()) {
-                $res = collect();
-                foreach ($myPengampu as $p) {
-                    $k = $p->kelas;
-                    if ($search !== '' && !str_contains(strtolower($k->nama), strtolower($search))) continue;
-                    $this->appendSesiItems($res, $k, " ({$p->kelompok->nama})", "{$user->name} (Anda)", $p->kelompok->nama, route('kelompok.kajian.show', [$p->kelompok, $k]));
+                if ($myPengampu->isNotEmpty()) {
+                    $res = collect();
+                    foreach ($myPengampu as $p) {
+                        $k = $p->kelas;
+                        if (!$k) continue;
+                        if ($search !== '' && !str_contains(strtolower($k->nama), strtolower($search))) continue;
+                        $this->appendSesiItems($res, $k, " ({$p->kelompok->nama})", "{$user->name} (Anda)", $p->kelompok->nama, route('kelompok.kajian.show', [$p->kelompok, $k]));
+                    }
+                    return $res;
                 }
-                return $res;
             }
+            return collect(); // Tutor tidak melihat kelas pengampu lain
         }
 
-        // 3. Konteks Admin & Default: Tampilkan data aktual penugasan kelompok & tutor
+        // 3. Konteks Admin & Mudabbir: Tampilkan seluruh data penugasan kelas & tutor
         $pengampuMap = $activePeriode ? KelompokPengampu::whereHas('kelompok', fn($q) => $q->where('periode_id', $activePeriode->id))
             ->with(['tutor', 'kelompok'])->get()->groupBy('kelas_id') : collect();
 

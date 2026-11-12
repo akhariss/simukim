@@ -9,8 +9,8 @@
                     ['label' => ($isSaya ?? false) ? 'Nilai Santri' : 'Rekap Nilai', 'url' => route('kelas.nilai.index', array_filter(['mode' => request('mode')]))],
                     ['label' => $selectedKelas->nama . ' (' . $selectedKelompok->nama . ')']
                 ]"
-                title="{{ $selectedKelas->nama }}"
-                description="Kelompok: {{ $selectedKelompok->nama }} • Semester {{ $periode?->nama ?? '-' }}"
+                :title="$selectedKelas->nama"
+                :description="'Kelompok: ' . $selectedKelompok->nama . ' • Semester ' . ($periode?->nama ?? '-')"
             >
                 <x-slot:actions>
                     <div class="flex items-center gap-2">

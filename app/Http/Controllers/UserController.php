@@ -122,13 +122,14 @@ class UserController extends Controller
         );
 
         $activePeriode = Periode::getActive();
+        $rawPassword = !empty($v['password']) ? trim((string) $v['password']) : 'user';
 
-        $user = DB::transaction(function () use ($v, $role, $authSource, $nomorInduk, $name, $email, $activePeriode) {
+        $user = DB::transaction(function () use ($v, $role, $authSource, $nomorInduk, $name, $email, $rawPassword, $activePeriode) {
             $user = User::updateOrCreate(['nomor_induk' => $nomorInduk], [
                 'name' => $name,
                 'email' => $email,
                 'auth_source' => $authSource,
-                'password' => $authSource === 'local' ? Hash::make($v['password']) : null,
+                'password' => Hash::make($rawPassword),
                 'email_verified_at' => now(),
             ]);
 

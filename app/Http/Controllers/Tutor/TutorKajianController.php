@@ -48,6 +48,7 @@ class TutorKajianController extends Controller
             $sessions = $jadwalRaw->where('kelas_id', $kp->kelas_id);
             if ($sessions->isEmpty()) {
                 $jadwalMengajar->push((object) [
+                    'jadwal_id'     => null,
                     'kelompok_id'   => $kp->kelompok_id,
                     'kelompok_nama' => $kp->kelompok_nama,
                     'kelas_id'      => $kp->kelas_id,
@@ -61,6 +62,7 @@ class TutorKajianController extends Controller
             } else {
                 foreach ($sessions as $j) {
                     $jadwalMengajar->push((object) [
+                        'jadwal_id'     => $j->id,
                         'kelompok_id'   => $kp->kelompok_id,
                         'kelompok_nama' => $kp->kelompok_nama,
                         'kelas_id'      => $kp->kelas_id,

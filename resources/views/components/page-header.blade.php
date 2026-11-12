@@ -31,11 +31,11 @@
 
                         @if(!empty($crumb['url']) && !$loop->last)
                             <a href="{{ $crumb['url'] }}" class="hover:text-blue-600 dark:hover:text-blue-400 font-medium transition truncate max-w-[160px] sm:max-w-none">
-                                {{ $crumb['label'] }}
+                                {{ html_entity_decode((string) $crumb['label'], ENT_QUOTES, 'UTF-8') }}
                             </a>
                         @else
                             <span class="{{ $loop->last ? 'text-slate-800 dark:text-slate-200 font-semibold' : 'text-slate-500 dark:text-slate-400 font-medium' }} truncate max-w-[200px] sm:max-w-none">
-                                {{ $crumb['label'] }}
+                                {{ html_entity_decode((string) $crumb['label'], ENT_QUOTES, 'UTF-8') }}
                             </span>
                         @endif
                     @endforeach
@@ -49,7 +49,7 @@
 
         {{-- 2. JUDUL HALAMAN (H1) --}}
         <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-            {{ $title }}
+            {{ html_entity_decode((string) $title, ENT_QUOTES, 'UTF-8') }}
         </h1>
 
         {{-- 3. DESKRIPSI / SUBTITLE --}}

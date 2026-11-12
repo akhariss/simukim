@@ -61,8 +61,8 @@ $roleMenuGroups = [
             ['name' => 'Data Asrama', 'route' => 'fasilitas.kelola.index', 'prefix' => 'fasilitas.kelola.*', 'icon' => $icAsrama],
         ],
         $adminIsTeaching ? 'Kelas Saya' : null => $adminIsTeaching ? [
-            ['name' => 'Presensi Kelas', 'route' => 'tutor.kajian.index', 'prefix' => 'tutor.kajian.*', 'icon' => $icKajian],
-            ['name' => 'Nilai Santri', 'route' => 'kelas.nilai.index', 'params' => ['mode' => 'saya'], 'is_active' => fn() => request()->routeIs('kelas.nilai.*') && request('mode') === 'saya', 'icon' => $icNilai],
+            ['name' => 'Kelas Saya', 'route' => 'tutor.kajian.index', 'prefix' => 'tutor.kajian.*', 'icon' => $icKajian],
+            ['name' => 'Presensi', 'route' => 'kelas.absensi.index', 'params' => ['mode' => 'saya'], 'is_active' => fn() => request()->routeIs('kelas.absensi.*') && request('mode') === 'saya', 'icon' => $icPresensi],
             ['name' => 'Laporan Bulanan', 'route' => 'kelas.laporan.index', 'params' => ['mode' => 'saya'], 'is_active' => fn() => request()->routeIs('kelas.laporan.*') && request('mode') === 'saya', 'icon' => $icLaporan],
         ] : null,
         'Manajemen Kajian' => [
@@ -84,8 +84,8 @@ $roleMenuGroups = [
             ['name' => 'Agenda Asrama', 'route' => 'kegiatan.index', 'prefix' => 'kegiatan.*', 'icon' => $icAgenda],
         ],
         'Kelas Saya' => [
-            ['name' => 'Presensi Kelas', 'route' => 'tutor.kajian.index', 'prefix' => 'tutor.kajian.*', 'icon' => $icKajian],
-            ['name' => 'Nilai Santri', 'route' => 'kelas.nilai.index', 'prefix' => 'kelas.nilai.*', 'icon' => $icNilai],
+            ['name' => 'Kelas Saya', 'route' => 'tutor.kajian.index', 'prefix' => 'tutor.kajian.*', 'icon' => $icKajian],
+            ['name' => 'Presensi', 'route' => 'kelas.absensi.index', 'prefix' => 'kelas.absensi.*', 'icon' => $icPresensi],
             ['name' => 'Laporan Bulanan', 'route' => 'kelas.laporan.index', 'prefix' => 'kelas.laporan.*', 'icon' => $icLaporan],
         ],
         'Kedisiplinan' => [

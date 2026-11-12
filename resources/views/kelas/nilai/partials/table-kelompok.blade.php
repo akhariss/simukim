@@ -47,7 +47,9 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-8 text-center text-xs text-slate-400">Belum ada data kelompok kajian yang diampu.</td>
+                        <td colspan="6" class="px-4 py-8 text-center text-xs text-slate-400">
+                            {{ ($isBinaan ?? false) ? 'Belum ada data kelompok kajian binaan yang diampu.' : 'Belum ada data kelompok halaqah atau mata kajian pada periode ini.' }}
+                        </td>
                     </tr>
                 @endforelse
             </tbody>
@@ -80,7 +82,9 @@
                 </div>
             </div>
         @empty
-            <div class="p-6 text-center text-xs text-slate-400">Belum ada data kelompok kajian yang diampu.</div>
+            <div class="p-6 text-center text-xs text-slate-400">
+                {{ ($isBinaan ?? false) ? 'Belum ada data kelompok kajian binaan yang diampu.' : 'Belum ada data kelompok halaqah atau mata kajian pada periode ini.' }}
+            </div>
         @endforelse
     </x-slot:mobile>
 </x-table-container>

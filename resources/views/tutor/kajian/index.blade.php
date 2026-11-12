@@ -47,7 +47,7 @@
                                 <td class="px-3 py-2 text-slate-600 dark:text-slate-300">{{ $jm->kelompok_nama }}</td>
                                 <td class="px-3 py-2 text-slate-400 font-mono text-[11px]">{{ $jm->nama_sesi }}</td>
                                 <td class="px-3 py-2 text-right">
-                                    <a href="{{ route('kelas.absensi.index', ['kelompok_id' => $jm->kelompok_id, 'kelas_id' => $jm->kelas_id]) }}" class="font-bold text-blue-600 dark:text-blue-400 hover:underline text-xs">Presensi &rarr;</a>
+                                    <a href="{{ route('kelas.absensi.index', array_filter(['kelompok_id' => $jm->kelompok_id, 'kelas_id' => $jm->kelas_id, 'jadwal_id' => $jm->jadwal_id ?? null])) }}" class="font-bold text-blue-600 dark:text-blue-400 hover:underline text-xs">Presensi &rarr;</a>
                                 </td>
                             </tr>
                         @empty
@@ -69,7 +69,7 @@
                             <p class="font-bold text-slate-900 dark:text-white truncate mt-0.5">{{ $jm->kelas_nama }}</p>
                             <p class="text-[10.5px] text-slate-500 truncate">{{ $jm->kelompok_nama }} &bull; {{ $jm->nama_sesi }}</p>
                         </div>
-                        <a href="{{ route('kelas.absensi.index', ['kelompok_id' => $jm->kelompok_id, 'kelas_id' => $jm->kelas_id]) }}" class="px-2.5 py-1 rounded-lg text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 shrink-0">Presensi &rarr;</a>
+                        <a href="{{ route('kelas.absensi.index', array_filter(['kelompok_id' => $jm->kelompok_id, 'kelas_id' => $jm->kelas_id, 'jadwal_id' => $jm->jadwal_id ?? null])) }}" class="px-2.5 py-1 rounded-lg text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 shrink-0">Presensi &rarr;</a>
                     </div>
                 @empty
                     <div class="py-4 text-center text-xs text-slate-400">Belum ada jadwal mengajar.</div>
