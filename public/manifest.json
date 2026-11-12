@@ -6,7 +6,13 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "display_override": ["tabbed", "window-controls-overlay", "standalone", "minimal-ui"],
+  "tab_strip": {
+    "home_tab": "auto",
+    "new_tab_button": {
+      "url": "/dashboard"
+    }
+  },
   "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
@@ -27,6 +33,9 @@
   "scope_extensions": [
     {
       "origin": "https://konfigura.my.id"
+    },
+    {
+      "origin": "https://*.konfigura.my.id"
     }
   ],
   "share_target": {

@@ -1,0 +1,10 @@
+{
+  "web_apps": [
+    {
+      "manifest": "https://konfigura.my.id/manifest.json",
+      "details": {
+        "paths": ["/*"]
+      }
+    }
+  ]
+}
