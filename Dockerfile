@@ -59,6 +59,7 @@ RUN mkdir -p storage/framework/cache/data \
              storage/framework/views \
              storage/logs \
              bootstrap/cache \
+             /run/nginx \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 

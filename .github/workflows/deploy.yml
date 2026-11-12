@@ -53,37 +53,37 @@ jobs:
             fi
 
             # 3. Tulis berkas .env produksi secara otomatis dari GitHub Secrets
-            cat << 'EOF' > .env
-            APP_NAME="SIMUKIM"
-            APP_ENV=production
-            APP_KEY=${{ secrets.ENV_APP_KEY }}
-            APP_DEBUG=false
-            APP_TIMEZONE=Asia/Jakarta
-            APP_URL=$APP_URL_VAL
+            cat << EOF > .env
+APP_NAME="SIMUKIM"
+APP_ENV="production"
+APP_KEY="${{ secrets.ENV_APP_KEY }}"
+APP_DEBUG="false"
+APP_TIMEZONE="Asia/Jakarta"
+APP_URL="${APP_URL_VAL}"
 
-            DB_CONNECTION=mysql
-            DB_HOST=db
-            DB_PORT=3306
-            DB_DATABASE=${{ secrets.ENV_DB_DATABASE || 'mahad_db' }}
-            DB_USERNAME=${{ secrets.ENV_DB_USERNAME || 'mahad_user' }}
-            DB_PASSWORD=${{ secrets.ENV_DB_PASSWORD }}
-            DB_ROOT_PASSWORD=${{ secrets.ENV_DB_ROOT_PASSWORD || secrets.ENV_DB_PASSWORD }}
+DB_CONNECTION="mysql"
+DB_HOST="db"
+DB_PORT="3306"
+DB_DATABASE="${{ secrets.ENV_DB_DATABASE || 'mahad_db' }}"
+DB_USERNAME="${{ secrets.ENV_DB_USERNAME || 'mahad_user' }}"
+DB_PASSWORD="${{ secrets.ENV_DB_PASSWORD }}"
+DB_ROOT_PASSWORD="${{ secrets.ENV_DB_ROOT_PASSWORD || secrets.ENV_DB_PASSWORD }}"
 
-            CAMPUS_API_BASE_URL=${{ secrets.ENV_CAMPUS_API_BASE_URL || 'https://bridge.uinssc.ac.id' }}
-            BRIDGE_API_URL=${{ secrets.ENV_BRIDGE_API_URL || 'https://bridge.uinssc.ac.id' }}
-            CAMPUS_API_TIMEOUT=5
-            CAMPUS_API_VERIFY_SSL=true
+CAMPUS_API_BASE_URL="${{ secrets.ENV_CAMPUS_API_BASE_URL || 'https://bridge.uinssc.ac.id' }}"
+BRIDGE_API_URL="${{ secrets.ENV_BRIDGE_API_URL || 'https://bridge.uinssc.ac.id' }}"
+CAMPUS_API_TIMEOUT=5
+CAMPUS_API_VERIFY_SSL=true
 
-            SAHAJA_API_URL=${{ secrets.ENV_SAHAJA_API_URL || 'https://sahaja.uinssc.ac.id' }}
-            SAHAJA_API_KEY=${{ secrets.ENV_SAHAJA_API_KEY }}
-            SAHAJA_API_TIMEOUT=5
-            SAHAJA_API_VERIFY_SSL=true
+SAHAJA_API_URL="${{ secrets.ENV_SAHAJA_API_URL || 'https://sahaja.uinssc.ac.id' }}"
+SAHAJA_API_KEY="${{ secrets.ENV_SAHAJA_API_KEY }}"
+SAHAJA_API_TIMEOUT=5
+SAHAJA_API_VERIFY_SSL=true
 
-            SESSION_DRIVER=file
-            CACHE_STORE=file
-            QUEUE_CONNECTION=sync
-            FILESYSTEM_DISK=local
-            EOF
+SESSION_DRIVER="file"
+CACHE_STORE="file"
+QUEUE_CONNECTION="sync"
+FILESYSTEM_DISK="local"
+EOF
 
             # 4. Tulis berkas docker-compose.yml produksi secara otomatis
             cat << 'COMPOSE_EOF' > docker-compose.yml
