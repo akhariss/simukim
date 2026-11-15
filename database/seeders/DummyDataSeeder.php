@@ -4,11 +4,13 @@ namespace Database\Seeders;
 
 use App\Enums\AbsensiStatus;
 use App\Enums\Gender;
+use App\Enums\KamarStatus;
 use App\Enums\KelasType;
 use App\Enums\PelanggaranStatus;
 use App\Enums\PenempatanStatus;
 use App\Enums\PerizinanStatus;
 use App\Enums\SantriStatus;
+use App\Enums\TipeRuang;
 use App\Models\Absensi;
 use App\Models\Gedung;
 use App\Models\Kamar;
@@ -16,6 +18,7 @@ use App\Models\Kelas;
 use App\Models\Kelompok;
 use App\Models\KelompokAnggota;
 use App\Models\KelompokPengampu;
+use App\Models\Lantai;
 use App\Models\Pelanggaran;
 use App\Models\PelanggaranJenis;
 use App\Models\PenempatanKamar;
@@ -93,7 +96,57 @@ class DummyDataSeeder extends Seeder
                 );
             }
 
-            // 4. Penempatan Kamar Otomatis
+            // 4. Pastikan Master Gedung, Lantai, dan Kamar Ikhwan & Akhwat Tersedia
+            $gedungIkhwan = Gedung::firstOrCreate(
+                ['kode' => 'G-IKH'],
+                ['nama' => 'Gedung Ali bin Abi Thalib (Ikhwan)', 'gender_khusus' => 'L', 'deskripsi' => 'Asrama Putra', 'is_active' => true]
+            );
+            $lantaiIkhwan1 = Lantai::firstOrCreate(
+                ['gedung_id' => $gedungIkhwan->id, 'nomor_lantai' => 1],
+                ['kapasitas_kamar_standar' => 4]
+            );
+            for ($k = 101; $k <= 104; $k++) {
+                Kamar::firstOrCreate(
+                    ['lantai_id' => $lantaiIkhwan1->id, 'nomor_kamar' => "A.{$k}"],
+                    ['tipe_ruang' => TipeRuang::Standar, 'gender' => Gender::L, 'kapasitas_maks' => 4, 'status' => KamarStatus::Tersedia]
+                );
+            }
+
+            $gedungAkhwat = Gedung::firstOrCreate(
+                ['kode' => 'G-AKH'],
+                ['nama' => 'Gedung Khadijah (Akhwat)', 'gender_khusus' => 'P', 'deskripsi' => 'Asrama Putri', 'is_active' => true]
+            );
+            $lantaiAkhwat1 = Lantai::firstOrCreate(
+                ['gedung_id' => $gedungAkhwat->id, 'nomor_lantai' => 1],
+                ['kapasitas_kamar_standar' => 4]
+            );
+            for ($k = 101; $k <= 104; $k++) {
+                Kamar::firstOrCreate(
+                    ['lantai_id' => $lantaiAkhwat1->id, 'nomor_kamar' => "K.{$k}"],
+                    ['tipe_ruang' => TipeRuang::Standar, 'gender' => Gender::P, 'kapasitas_maks' => 4, 'status' => KamarStatus::Tersedia]
+                );
+            }
+
+            // Rekonsiliasi & Koreksi Otomatis Penempatan Mismatched Gender
+            $mismatched = PenempatanKamar::with(['santri', 'kamar'])->where('status', PenempatanStatus::Aktif)->get();
+            foreach ($mismatched as $pItem) {
+                if ($pItem->santri && $pItem->kamar) {
+                    $sGen = $pItem->santri->gender instanceof Gender ? $pItem->santri->gender->value : (string)$pItem->santri->gender;
+                    $kGen = $pItem->kamar->gender instanceof Gender ? $pItem->kamar->gender->value : (string)$pItem->kamar->gender;
+                    if ($sGen !== $kGen) {
+                        $matchedRoom = Kamar::where('gender', $sGen)
+                            ->where('status', KamarStatus::Tersedia)
+                            ->withCount(['penempatanAktif as terisi_count'])
+                            ->get()
+                            ->first(fn($r) => $r->terisi_count < $r->kapasitas_maks);
+                        if ($matchedRoom) {
+                            $pItem->update(['kamar_id' => $matchedRoom->id]);
+                        }
+                    }
+                }
+            }
+
+            // Penempatan Kamar Otomatis Sesuai Gender & Kapasitas
             $allSantri = array_merge($mudabbirSantris, $mahasantriList);
             $rooms = Kamar::withCount(['penempatanAktif as terisi_count'])->get();
             foreach ($allSantri as $s) {
