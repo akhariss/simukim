@@ -29,12 +29,12 @@ class CampusAuthService
         try { if ($localUser && $localUser->password && Hash::check($password, $localUser->password)) return $localUser; } catch (\Throwable) {}
         $invalidMsg = 'Username atau kata sandi yang Anda masukkan tidak sesuai.';
         if ($localUser && $localUser->auth_source === 'local') {
-            throw ValidationException::withMessages(['email' => $invalidMsg, 'username' => $invalidMsg, 'login_id' => $invalidMsg]);
+            throw ValidationException::withMessages(['email' => $invalidMsg, 'username' => $invalidMsg, 'login_id' => $invalidMsg])->redirectTo(route('login'));
         }
 
         $verifyResult = $this->api->verifyCredentials($identifier, $password);
         if (empty($verifyResult['success'])) {
-            throw ValidationException::withMessages(['email' => $invalidMsg, 'username' => $invalidMsg, 'login_id' => $invalidMsg]);
+            throw ValidationException::withMessages(['email' => $invalidMsg, 'username' => $invalidMsg, 'login_id' => $invalidMsg])->redirectTo(route('login'));
         }
 
         if (!$localUser) {

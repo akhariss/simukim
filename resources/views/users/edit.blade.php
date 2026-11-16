@@ -4,7 +4,7 @@
         $roleName = $user->roles->first()?->name ?? 'mahasantri';
     @endphp
 
-    <div class="space-y-4 sm:space-y-6" x-data="{ currentRole: '{{ old('role', $roleName) }}' }">
+    <div class="space-y-4 sm:space-y-6" x-data="{ currentRole: @js((string) old('role', $roleName)) }">
         <!-- 1. MODULAR PAGE HEADER -->
         <x-page-header
             :breadcrumbs="[

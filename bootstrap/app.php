@@ -15,12 +15,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->trustProxies(at: '*');
+
         $middleware->web(append: [
             SecurityHeaders::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
-            'login',
+            // No CSRF exemptions - enforce CSRF token across all state-changing endpoints
         ]);
 
         $middleware->alias([

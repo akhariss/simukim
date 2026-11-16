@@ -15,6 +15,13 @@ class SecurityHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $isSecure = $request->isSecure() || $request->header('X-Forwarded-Proto') === 'https';
+
+        // Enforce HTTPS redirect on cleartext HTTP in production or when FORCE_HTTPS is enabled
+        if (!$isSecure && (app()->environment('production') || env('FORCE_HTTPS', false))) {
+            return redirect()->secure($request->getRequestUri(), 301);
+        }
+
         $response = $next($request);
 
         $response->headers->set('X-Content-Type-Options', 'nosniff');
@@ -23,7 +30,7 @@ class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
-        if ($request->isSecure()) {
+        if ($isSecure || app()->environment('production')) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
         }
 

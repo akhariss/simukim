@@ -14,6 +14,13 @@ use Illuminate\Validation\ValidationException;
 class LoginRequest extends FormRequest
 {
     /**
+     * Route tujuan redirect jika validasi gagal (mencegah open redirect via Referer header).
+     *
+     * @var string
+     */
+    protected $redirectRoute = 'login';
+
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
@@ -58,7 +65,7 @@ class LoginRequest extends FormRequest
             throw ValidationException::withMessages([
                 'login_id' => 'NIM, NIP, atau Email wajib diisi.',
                 'email'    => 'NIM, NIP, atau Email wajib diisi.',
-            ]);
+            ])->redirectTo(route('login'));
         }
 
         try {
@@ -70,13 +77,13 @@ class LoginRequest extends FormRequest
             RateLimiter::clear($this->throttleKey());
         } catch (ValidationException $e) {
             RateLimiter::hit($this->throttleKey());
-            throw $e;
+            throw $e->redirectTo(route('login'));
         } catch (\Exception $e) {
             RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
                 'email' => $e->getMessage(),
                 'login_id' => $e->getMessage(),
-            ]);
+            ])->redirectTo(route('login'));
         }
     }
 
@@ -100,7 +107,7 @@ class LoginRequest extends FormRequest
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
-        ]);
+        ])->redirectTo(route('login'));
     }
 
     /**

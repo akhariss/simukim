@@ -3,7 +3,7 @@
         class="min-h-screen min-h-[100dvh] relative flex flex-col justify-between font-sans select-none overflow-x-hidden"
         x-data="{
             showPass: false,
-            loginId: '{{ old('username', old('login_id', old('email', ''))) }}',
+            loginId: @js((string) old('username', old('login_id', old('email', '')))),
             loginPassword: '',
             isSubmitting: false,
             showDemoAccounts: false,
