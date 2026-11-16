@@ -45,33 +45,43 @@
     $initialDateTitle = $initialDateCarbon->translatedFormat('l, d F Y');
     $initialIsToday = $initialDateCarbon->isToday();
 
-    $initialDayOfWeek = $dayNamesMap[$initialDateCarbon->dayOfWeek];
-    $rawInitEvents = $events->filter(function($item) use ($initialDayOfWeek, $initialDateCarbon, $matchesDay) {
-        $isKelas = $item->is_kelas ?? false;
-        $jenisCode = $item->jenis_code ?? ($item->jenis instanceof \App\Enums\KegiatanJenis ? $item->jenis->value : $item->jenis ?? '');
-        if ($isKelas || $jenisCode === 'rutin') return $matchesDay($item->hari, $initialDayOfWeek);
-        if ($jenisCode === 'khusus' && $item->tanggal_mulai) {
-            $start = \Carbon\Carbon::parse($item->tanggal_mulai)->startOfDay();
-            $end = $item->tanggal_selesai ? \Carbon\Carbon::parse($item->tanggal_selesai)->endOfDay() : $start->copy()->endOfDay();
-            return $initialDateCarbon->betweenIncluded($start, $end);
-        }
-        return false;
-    })->values();
+    $eventsByDay = [];
+    $dateTitlesByDay = [];
+    for ($d = 1; $d <= $daysInMonth; $d++) {
+        $loopD = \Carbon\Carbon::create($tahun, $bulan, $d);
+        $dOfWeek = $dayNamesMap[$loopD->dayOfWeek];
+        $dateTitlesByDay[$d] = $loopD->translatedFormat('l, d F Y');
 
-    $initialEvents = $processEvents($rawInitEvents);
+        $rawForD = $events->filter(function($item) use ($dOfWeek, $loopD, $matchesDay) {
+            $isKelas = $item->is_kelas ?? false;
+            $jenisCode = $item->jenis_code ?? ($item->jenis instanceof \App\Enums\KegiatanJenis ? $item->jenis->value : $item->jenis ?? '');
+            if ($isKelas || $jenisCode === 'rutin') return $matchesDay($item->hari, $dOfWeek);
+            if ($jenisCode === 'khusus' && $item->tanggal_mulai) {
+                $start = \Carbon\Carbon::parse($item->tanggal_mulai)->startOfDay();
+                $end = $item->tanggal_selesai ? \Carbon\Carbon::parse($item->tanggal_selesai)->endOfDay() : $start->copy()->endOfDay();
+                return $loopD->betweenIncluded($start, $end);
+            }
+            return false;
+        })->values();
+
+        $eventsByDay[$d] = $processEvents($rawForD);
+    }
 @endphp
 
 <div
     x-data="{
         selectedDay: {{ $initialDay }},
-        selectedDateTitle: '{{ $initialDateTitle }}',
+        selectedDateTitle: @js($initialDateTitle),
         selectedDayIsToday: {{ $initialIsToday ? 'true' : 'false' }},
-        selectedEvents: {{ Js::from($initialEvents) }},
-        selectDay(dayNum, title, isToday, events) {
+        eventsByDay: @js($eventsByDay),
+        dateTitles: @js($dateTitlesByDay),
+        get selectedEvents() {
+            return this.eventsByDay[this.selectedDay] || [];
+        },
+        selectDay(dayNum, isToday) {
             this.selectedDay = dayNum;
-            this.selectedDateTitle = title;
+            this.selectedDateTitle = this.dateTitles[dayNum] || '';
             this.selectedDayIsToday = isToday;
-            this.selectedEvents = events;
         }
     }"
     class="space-y-4"
@@ -104,24 +114,10 @@
                     $isToday = $loopDate->isToday();
                     $isSunday = ($loopDate->dayOfWeek === 0);
                     $isSaturday = ($loopDate->dayOfWeek === 6);
-
-                    $rawEventsForDay = $events->filter(function($item) use ($dayOfWeekName, $loopDate, $matchesDay) {
-                        $isKelas = $item->is_kelas ?? false;
-                        $jenisCode = $item->jenis_code ?? ($item->jenis instanceof \App\Enums\KegiatanJenis ? $item->jenis->value : $item->jenis ?? '');
-                        if ($isKelas || $jenisCode === 'rutin') return $matchesDay($item->hari, $dayOfWeekName);
-                        if ($jenisCode === 'khusus' && $item->tanggal_mulai) {
-                            $start = \Carbon\Carbon::parse($item->tanggal_mulai)->startOfDay();
-                            $end = $item->tanggal_selesai ? \Carbon\Carbon::parse($item->tanggal_selesai)->endOfDay() : $start->copy()->endOfDay();
-                            return $loopDate->betweenIncluded($start, $end);
-                        }
-                        return false;
-                    })->values();
-
-                    $eventsForDay = $processEvents($rawEventsForDay);
-                    $dateTitleStr = $loopDate->translatedFormat('l, d F Y');
+                    $eventsForDay = $eventsByDay[$day] ?? collect();
                 @endphp
                 <div
-                    @click="selectDay({{ $day }}, '{{ $dateTitleStr }}', {{ $isToday ? 'true' : 'false' }}, {{ Js::from($eventsForDay) }})"
+                    @click="selectDay({{ $day }}, {{ $isToday ? 'true' : 'false' }})"
                     class="min-h-[56px] sm:min-h-[105px] p-1 sm:p-1.5 transition-all hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer flex flex-col justify-between group rounded-lg"
                     :class="selectedDay === {{ $day }} ? 'ring-2 ring-blue-600 dark:ring-blue-500 bg-blue-50/50 dark:bg-slate-800/80' : '{{ $isToday ? 'bg-blue-50/25 dark:bg-slate-800/40' : '' }}'"
                     title="Klik tanggal {{ $day }} untuk melihat agenda"

@@ -59,12 +59,12 @@
     <div
         id="penempatan-table-container"
         x-data="{
-            viewMode: '{{ $initialMode }}',
-            search: '{{ request('search') }}',
-            gender: '{{ request('gender') }}',
-            role: '{{ request('role') }}',
-            gedung_id: '{{ request('gedung_id') }}',
-            activeTab: '{{ $activeTab }}',
+            viewMode: @js((string) $initialMode),
+            search: @js((string) request('search', '')),
+            gender: @js((string) request('gender', '')),
+            role: @js((string) request('role', '')),
+            gedung_id: @js((string) request('gedung_id', '')),
+            activeTab: @js((string) $activeTab),
             isLoading: false,
             timer: null,
             switchMode(mode) {

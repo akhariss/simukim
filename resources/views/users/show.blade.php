@@ -22,7 +22,7 @@
                 ['label' => 'Kelola Pengguna', 'url' => route('users.index')],
                 ['label' => $user->name]
             ]"
-            title="{{ $user->name }}"
+            :title="$user->name"
             description="Detail informasi akun, identitas sivitas kampus, kontak, dan riwayat peran pengguna."
         >
             <x-slot:actions>

@@ -178,10 +178,10 @@ Route::middleware(['auth'])->group(function () {
         // Agenda & Kegiatan Asrama
         Route::prefix('kegiatan')->name('kegiatan.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Kegiatan\KegiatanController::class, 'index'])->name('index');
-            Route::post('/', [\App\Http\Controllers\Kegiatan\KegiatanController::class, 'store'])->name('store')->middleware(['role:admin|mudabbir']);
-            Route::put('/{kegiatan}', [\App\Http\Controllers\Kegiatan\KegiatanController::class, 'update'])->name('update')->middleware(['role:admin|mudabbir']);
-            Route::delete('/{kegiatan}', [\App\Http\Controllers\Kegiatan\KegiatanController::class, 'destroy'])->name('destroy')->middleware(['role:admin|mudabbir']);
-            Route::patch('/{kegiatan}/toggle', [\App\Http\Controllers\Kegiatan\KegiatanController::class, 'toggleStatus'])->name('toggle')->middleware(['role:admin|mudabbir']);
+            Route::post('/', [\App\Http\Controllers\Kegiatan\KegiatanController::class, 'store'])->name('store')->middleware(['role:admin']);
+            Route::put('/{kegiatan}', [\App\Http\Controllers\Kegiatan\KegiatanController::class, 'update'])->name('update')->middleware(['role:admin']);
+            Route::delete('/{kegiatan}', [\App\Http\Controllers\Kegiatan\KegiatanController::class, 'destroy'])->name('destroy')->middleware(['role:admin']);
+            Route::patch('/{kegiatan}/toggle', [\App\Http\Controllers\Kegiatan\KegiatanController::class, 'toggleStatus'])->name('toggle')->middleware(['role:admin']);
         });
 
         // Kedisiplinan & Perizinan Mahasantri

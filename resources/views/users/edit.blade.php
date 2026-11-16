@@ -11,7 +11,7 @@
                 ['label' => 'Kelola Pengguna', 'url' => route('users.index')],
                 ['label' => 'Edit Pengguna']
             ]"
-            title="Edit Pengguna: {{ $user->name }}"
+            :title="'Edit Pengguna: ' . $user->name"
             description="Perbarui informasi profil, kontak, atau peran akun pengguna sistem."
         >
             <x-slot:actions>

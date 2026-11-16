@@ -71,9 +71,9 @@
                                     type="button"
                                     @click="$dispatch('open-pindah-modal', {
                                         penempatanId: {{ $penempatan->id }},
-                                        santriName: '{{ addslashes($santri->user->name ?? '') }}',
-                                        currentRoom: '{{ $kamar->nomor_kamar ?? '' }}',
-                                        gender: '{{ $santri->gender }}'
+                                        santriName: @js($santri->user->name ?? ''),
+                                        currentRoom: @js($kamar->nomor_kamar ?? ''),
+                                        gender: @js((string) $santri->gender)
                                     })"
                                     class="p-1.5 rounded-lg text-amber-600 hover:bg-white dark:hover:bg-slate-700 transition cursor-pointer"
                                     title="Pindah / Mutasi Kamar"
@@ -156,9 +156,9 @@
                         type="button"
                         @click="$dispatch('open-pindah-modal', {
                             penempatanId: {{ $penempatan->id }},
-                            santriName: '{{ addslashes($santri->user->name ?? '') }}',
-                            currentRoom: '{{ $kamar->nomor_kamar ?? '' }}',
-                            gender: '{{ $santri->gender }}'
+                            santriName: @js($santri->user->name ?? ''),
+                            currentRoom: @js($kamar->nomor_kamar ?? ''),
+                            gender: @js((string) $santri->gender)
                         })"
                         class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1 cursor-pointer"
                     >

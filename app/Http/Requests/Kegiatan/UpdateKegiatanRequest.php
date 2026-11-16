@@ -10,7 +10,7 @@ class UpdateKegiatanRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->hasAnyRole(['admin', 'mudabbir']) ?? false;
+        return $this->user()?->hasRole('admin') ?? false;
     }
 
     public function rules(): array

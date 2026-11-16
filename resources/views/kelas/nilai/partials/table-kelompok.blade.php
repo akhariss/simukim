@@ -13,7 +13,7 @@
             </thead>
             <tbody class="divide-y divide-slate-200/60 dark:divide-slate-800/60">
                 @forelse($myKajianList as $k)
-                    <tr x-show="matchesItem('{{ addslashes($k->kelompok_nama) }}', '{{ addslashes($k->kelas_nama) }}', '{{ addslashes($k->jadwal_text) }}', '{{ addslashes($k->santri_keywords ?? '') }}', '{{ $k->periode_id }}')"
+                    <tr x-show="matchesItem(@js($k->kelompok_nama), @js($k->kelas_nama), @js($k->jadwal_text), @js($k->santri_keywords ?? ''), @js((string) $k->periode_id))"
                         class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
                         <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white">
                             <div>{{ $k->kelompok_nama }}</div>
@@ -58,7 +58,7 @@
 
     <x-slot:mobile>
         @forelse($myKajianList as $k)
-            <div x-show="matchesItem('{{ addslashes($k->kelompok_nama) }}', '{{ addslashes($k->kelas_nama) }}', '{{ addslashes($k->jadwal_text) }}', '{{ addslashes($k->santri_keywords ?? '') }}', '{{ $k->periode_id }}')"
+            <div x-show="matchesItem(@js($k->kelompok_nama), @js($k->kelas_nama), @js($k->jadwal_text), @js($k->santri_keywords ?? ''), @js((string) $k->periode_id))"
                  class="p-3.5 space-y-2.5 border-b border-slate-100 dark:border-slate-800 last:border-b-0">
                 <div class="flex items-start justify-between">
                     <div>

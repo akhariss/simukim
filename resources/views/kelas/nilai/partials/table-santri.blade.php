@@ -13,7 +13,7 @@
             </thead>
             <tbody class="divide-y divide-slate-200/60 dark:divide-slate-800/60">
                 @forelse($santriRaporList as $idx => $s)
-                    <tr x-show="matchesSantri('{{ addslashes($s->santri_nama) }}', '{{ addslashes($s->nomor_induk) }}', '{{ addslashes($s->kelompok_nama) }}', '{{ addslashes($s->prodi) }}', '{{ $s->periode_id }}')"
+                    <tr x-show="matchesSantri(@js($s->santri_nama), @js($s->nomor_induk), @js($s->kelompok_nama), @js($s->prodi), @js((string) $s->periode_id))"
                         class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
                         <td class="px-4 py-3 text-center font-mono text-slate-400">{{ $idx + 1 }}</td>
                         <td class="px-4 py-3">
@@ -78,7 +78,7 @@
 
     <x-slot:mobile>
         @forelse($santriRaporList as $s)
-            <div x-show="matchesSantri('{{ addslashes($s->santri_nama) }}', '{{ addslashes($s->nomor_induk) }}', '{{ addslashes($s->kelompok_nama) }}', '{{ addslashes($s->prodi) }}', '{{ $s->periode_id }}')"
+            <div x-show="matchesSantri(@js($s->santri_nama), @js($s->nomor_induk), @js($s->kelompok_nama), @js($s->prodi), @js((string) $s->periode_id))"
                  class="p-3.5 space-y-3 border-b border-slate-100 dark:border-slate-800 last:border-b-0">
                 <div class="flex items-start justify-between gap-2">
                     <div>

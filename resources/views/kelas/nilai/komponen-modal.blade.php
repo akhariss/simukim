@@ -28,7 +28,7 @@
                             {{-- Tombol Edit --}}
                             <button
                                 type="button"
-                                @click="editingId = {{ $komp->id }}; editNama = '{{ addslashes($komp->nama) }}'; editBobot = {{ $komp->bobot }};"
+                                @click="editingId = {{ $komp->id }}; editNama = @js($komp->nama); editBobot = {{ (float) $komp->bobot }};"
                                 class="text-blue-600 hover:text-blue-800 dark:text-blue-400 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-950/30 transition cursor-pointer"
                                 title="Edit Bobot & Nama Komponen"
                             >

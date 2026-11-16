@@ -163,9 +163,15 @@ class PenempatanController extends Controller
 
     public function getAvailableRooms(Request $request, PenempatanService $service): JsonResponse
     {
-        $gedungId = filter_var($request->query('gedung_id'), FILTER_VALIDATE_INT) ?: null;
-        $gender = in_array($request->query('gender'), ['L', 'P']) ? $request->query('gender') : null;
-        $search = mb_substr(trim(strip_tags((string) $request->query('search'))), 0, 50) ?: null;
+        $validated = $request->validate([
+            'gender' => ['required', 'in:L,P'],
+            'gedung_id' => ['nullable', 'integer', 'exists:mahad_gedung,id'],
+            'search' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $gedungId = isset($validated['gedung_id']) ? (int) $validated['gedung_id'] : null;
+        $gender = $validated['gender'];
+        $search = isset($validated['search']) ? trim(strip_tags((string) $validated['search'])) : null;
 
         $rooms = $service->getAvailableRoomsQuery($gedungId, $gender, $search)->get()->map(fn($k) => [
             'id' => $k->id,

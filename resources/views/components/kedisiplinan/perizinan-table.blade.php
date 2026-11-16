@@ -71,20 +71,20 @@
                                         type="button"
                                         @click="$dispatch('open-detail-izin', {
                                             id: {{ $izin->id }},
-                                            nama: '{{ addslashes($izin->santri->user->name ?? 'Mahasantri') }}',
-                                            nim: '{{ $izin->santri->nomor_induk }}',
-                                            gender: '{{ ($izin->santri->gender?->value ?? $izin->santri->gender) === 'L' ? 'Ikhwan' : 'Akhwat' }}',
-                                            prodi: '{{ addslashes($izin->santri->prodi ?? '') }}',
-                                            kamar: '{{ addslashes($kamarStr) }}',
-                                            kategori: '{{ addslashes($izin->jenisPerizinan->nama ?? 'Izin Santri') }}',
-                                            tanggal_mulai: '{{ $izin->tanggal_mulai->format('d M Y') }}',
-                                            tanggal_selesai: '{{ $izin->tanggal_selesai->format('d M Y') }}',
+                                            nama: @js($izin->santri->user->name ?? 'Mahasantri'),
+                                            nim: @js((string) $izin->santri->nomor_induk),
+                                            gender: @js((($izin->santri->gender?->value ?? $izin->santri->gender) === 'L') ? 'Ikhwan' : 'Akhwat'),
+                                            prodi: @js($izin->santri->prodi ?? ''),
+                                            kamar: @js($kamarStr),
+                                            kategori: @js($izin->jenisPerizinan->nama ?? 'Izin Santri'),
+                                            tanggal_mulai: @js($izin->tanggal_mulai->format('d M Y')),
+                                            tanggal_selesai: @js($izin->tanggal_selesai->format('d M Y')),
                                             durasi: {{ $durasi }},
-                                            alasan: '{{ addslashes($izin->alasan) }}',
-                                            status: '{{ $statusVal }}',
-                                            input_by_name: '{{ addslashes($izin->inputBy->name ?? 'Admin Asrama') }}',
-                                            created_at: '{{ $izin->created_at->format('d M Y, H:i') }} WIB',
-                                            cetak_url: '{{ route('kedisiplinan.perizinan.cetak', $izin->id) }}'
+                                            alasan: @js($izin->alasan ?? ''),
+                                            status: @js($statusVal),
+                                            input_by_name: @js($izin->inputBy->name ?? 'Admin Asrama'),
+                                            created_at: @js($izin->created_at->format('d M Y, H:i') . ' WIB'),
+                                            cetak_url: @js(route('kedisiplinan.perizinan.cetak', $izin->id))
                                         })"
                                         class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 transition cursor-pointer"
                                         title="Lihat Detail Izin"
@@ -155,20 +155,20 @@
                             type="button"
                             @click="$dispatch('open-detail-izin', {
                                 id: {{ $izin->id }},
-                                nama: '{{ addslashes($izin->santri->user->name ?? 'Mahasantri') }}',
-                                nim: '{{ $izin->santri->nomor_induk }}',
-                                gender: '{{ ($izin->santri->gender?->value ?? $izin->santri->gender) === 'L' ? 'Ikhwan' : 'Akhwat' }}',
-                                prodi: '{{ addslashes($izin->santri->prodi ?? '') }}',
-                                kamar: '{{ addslashes($kamarStr) }}',
-                                kategori: '{{ addslashes($izin->jenisPerizinan->nama ?? 'Izin Santri') }}',
-                                tanggal_mulai: '{{ $izin->tanggal_mulai->format('d M Y') }}',
-                                tanggal_selesai: '{{ $izin->tanggal_selesai->format('d M Y') }}',
+                                nama: @js($izin->santri->user->name ?? 'Mahasantri'),
+                                nim: @js((string) $izin->santri->nomor_induk),
+                                gender: @js((($izin->santri->gender?->value ?? $izin->santri->gender) === 'L') ? 'Ikhwan' : 'Akhwat'),
+                                prodi: @js($izin->santri->prodi ?? ''),
+                                kamar: @js($kamarStr),
+                                kategori: @js($izin->jenisPerizinan->nama ?? 'Izin Santri'),
+                                tanggal_mulai: @js($izin->tanggal_mulai->format('d M Y')),
+                                tanggal_selesai: @js($izin->tanggal_selesai->format('d M Y')),
                                 durasi: {{ $durasi }},
-                                alasan: '{{ addslashes($izin->alasan) }}',
-                                status: '{{ $statusVal }}',
-                                input_by_name: '{{ addslashes($izin->inputBy->name ?? 'Admin Asrama') }}',
-                                created_at: '{{ $izin->created_at->format('d M Y, H:i') }} WIB',
-                                cetak_url: '{{ route('kedisiplinan.perizinan.cetak', $izin->id) }}'
+                                alasan: @js($izin->alasan ?? ''),
+                                status: @js($statusVal),
+                                input_by_name: @js($izin->inputBy->name ?? 'Admin Asrama'),
+                                created_at: @js($izin->created_at->format('d M Y, H:i') . ' WIB'),
+                                cetak_url: @js(route('kedisiplinan.perizinan.cetak', $izin->id))
                             })"
                             class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
                         >
