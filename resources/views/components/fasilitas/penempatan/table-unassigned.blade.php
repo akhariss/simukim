@@ -55,7 +55,7 @@
                                 @click="$dispatch('open-assign-modal', {
                                     santriId: {{ $santri->id }},
                                     santriName: @js($santri->user->name ?? ''),
-                                    gender: @js((string) $santri->gender)
+                                    gender: @js($santri->gender?->value ?? (string) ($santri->gender ?? ''))
                                 })"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-xs transition cursor-pointer"
                             >
@@ -106,7 +106,7 @@
                         @click="$dispatch('open-assign-modal', {
                             santriId: {{ $santri->id }},
                             santriName: @js($santri->user->name ?? ''),
-                            gender: @js((string) $santri->gender)
+                            gender: @js($santri->gender?->value ?? (string) ($santri->gender ?? ''))
                         })"
                         class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-2xs cursor-pointer"
                     >

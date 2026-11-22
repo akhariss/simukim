@@ -36,8 +36,8 @@
                                 <span class="text-slate-300 dark:text-slate-600">·</span>
                                 <span>{{ $santri->prodi ?? 'Reguler' }}{{ !empty($santri->angkatan) ? " '" . substr((string)$santri->angkatan, -2) : '' }}</span>
                                 <span class="text-slate-300 dark:text-slate-600">·</span>
-                                <span class="{{ $santri->gender === 'L' ? 'text-blue-600 dark:text-blue-400' : 'text-pink-600 dark:text-pink-400' }} font-semibold">
-                                    {{ $santri->gender === 'L' ? 'Ikhwan' : 'Akhwat' }}
+                                <span class="{{ ($santri->gender?->value ?? $santri->gender) === 'L' ? 'text-blue-600 dark:text-blue-400' : 'text-pink-600 dark:text-pink-400' }} font-semibold">
+                                    {{ ($santri->gender?->value ?? $santri->gender) === 'L' ? 'Ikhwan' : 'Akhwat' }}
                                 </span>
                             </div>
                         </td>
@@ -73,7 +73,7 @@
                                         penempatanId: {{ $penempatan->id }},
                                         santriName: @js($santri->user->name ?? ''),
                                         currentRoom: @js($kamar->nomor_kamar ?? ''),
-                                        gender: @js((string) $santri->gender)
+                                        gender: @js($santri->gender?->value ?? (string) ($santri->gender ?? ''))
                                     })"
                                     class="p-1.5 rounded-lg text-amber-600 hover:bg-white dark:hover:bg-slate-700 transition cursor-pointer"
                                     title="Pindah / Mutasi Kamar"
@@ -158,7 +158,7 @@
                             penempatanId: {{ $penempatan->id }},
                             santriName: @js($santri->user->name ?? ''),
                             currentRoom: @js($kamar->nomor_kamar ?? ''),
-                            gender: @js((string) $santri->gender)
+                            gender: @js($santri->gender?->value ?? (string) ($santri->gender ?? ''))
                         })"
                         class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1 cursor-pointer"
                     >
