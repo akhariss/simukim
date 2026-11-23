@@ -5,25 +5,7 @@
             showPass: false,
             loginId: @js((string) old('username', old('login_id', old('email', '')))),
             loginPassword: '',
-            isSubmitting: false,
-            showDemoAccounts: false,
-            fastLogin(id, pass) {
-                if (this.isSubmitting) return;
-                this.isSubmitting = true;
-                this.loginId = id;
-                this.loginPassword = pass;
-                const elUser = document.getElementById('username');
-                const elId = document.getElementById('login_id');
-                const elPass = document.getElementById('password');
-                if (elUser) elUser.value = id;
-                if (elId) elId.value = id;
-                if (elPass) elPass.value = pass;
-                this.$nextTick(() => {
-                    if (this.$refs.loginForm) {
-                        this.$refs.loginForm.submit();
-                    }
-                });
-            }
+            isSubmitting: false
         }"
     >
         <!-- Optimized Campus Background (83% Lighter WebP + Progressive JPG, Zero Freeze) -->
@@ -196,10 +178,7 @@
                         </div>
                     </div>
 
-                    @if(app()->isLocal())
-                        <!-- Demo Accounts Shortcut -->
-                        @include('auth.partials.login-demo-accounts')
-                    @endif
+
                 </form>
             </div>
         </main>
