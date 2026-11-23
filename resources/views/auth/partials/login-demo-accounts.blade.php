@@ -12,27 +12,27 @@
     <div x-show="showDemoAccounts" x-cloak class="mt-2.5 grid grid-cols-3 gap-1.5 text-left">
         <button
             type="button"
-            @click="fastLogin('NIP-ADM01', 'password')"
+            @click="fastLogin('admin@uinssc.ac.id', 'password')"
             class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-blue-500 transition cursor-pointer"
         >
             <span class="block text-[10px] font-bold text-slate-700 dark:text-slate-200">Admin</span>
-            <span class="block text-[9px] text-slate-400 font-mono">ADM01</span>
+            <span class="block text-[9px] text-slate-400 font-mono">admin</span>
         </button>
         <button
             type="button"
-            @click="fastLogin('2388010004', 'password')"
+            @click="fastLogin('mhs1', 'password')"
             class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-blue-500 transition cursor-pointer"
         >
-            <span class="block text-[10px] font-bold text-slate-700 dark:text-slate-200">Santri 1</span>
-            <span class="block text-[9px] text-slate-400 font-mono">...0004</span>
+            <span class="block text-[10px] font-bold text-slate-700 dark:text-slate-200">Mahasantri</span>
+            <span class="block text-[9px] text-slate-400 font-mono">mhs1</span>
         </button>
         <button
             type="button"
-            @click="fastLogin('2388010002', 'password')"
+            @click="fastLogin('mdb1', 'password')"
             class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-blue-500 transition cursor-pointer"
         >
-            <span class="block text-[10px] font-bold text-slate-700 dark:text-slate-200">Santri 2</span>
-            <span class="block text-[9px] text-slate-400 font-mono">...0002</span>
+            <span class="block text-[10px] font-bold text-slate-700 dark:text-slate-200">Mudabbir</span>
+            <span class="block text-[9px] text-slate-400 font-mono">mdb1</span>
         </button>
     </div>
 </div>

@@ -136,7 +136,7 @@
                                 type="text"
                                 name="username"
                                 x-model="loginId"
-                                placeholder="Contoh: 2388010004 atau NIP-ADM01"
+                                placeholder="Masukkan NIM, NIP, atau Email"
                                 class="w-full text-xs rounded-xl pl-10 pr-3.5 py-3 border border-slate-300 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-blue-500/15 focus:border-blue-600 transition outline-none font-medium"
                                 required
                                 autofocus
