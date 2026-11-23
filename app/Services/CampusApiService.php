@@ -206,9 +206,13 @@ class CampusApiService
 
     public function smartLookup(string $identifier): ?array
     {
-        foreach ($this->fetchMuqimStudents('20251')['data'] ?? [] as $st) {
-            if (($st['nim'] ?? '') === $identifier || str_contains(strtolower($st['nama'] ?? ''), strtolower($identifier))) {
-                return ['success' => true, 'source_type' => 'mahasiswa', 'raw' => $st, 'data' => $st];
+        $activeKode = \App\Models\Periode::getActive()?->kode ?? $this->fetchActivePeriode()['kode'] ?? '20261';
+        $periodesToCheck = array_unique(array_filter([$activeKode, '20261', '20251']));
+        foreach ($periodesToCheck as $kd) {
+            foreach ($this->fetchMuqimStudents($kd)['data'] ?? [] as $st) {
+                if (($st['nim'] ?? '') === $identifier || str_contains(strtolower($st['nama'] ?? ''), strtolower($identifier))) {
+                    return ['success' => true, 'source_type' => 'mahasiswa', 'raw' => $st, 'data' => $st];
+                }
             }
         }
         return null;

@@ -39,12 +39,25 @@ class CampusAuthService
 
         if (!$localUser) {
             $lookup = $this->api->smartLookup($identifier);
-            if (!empty($lookup['raw'])) return $this->syncSahajaStudent($lookup['raw']);
-        }
+            if (!empty($lookup['raw'])) {
+                return $this->syncSahajaStudent($lookup['raw']);
+            }
 
-        // 3. Fallback: Auto-Sinkronisasi Akun Kampus Umum (Dosen/Tutor/Mahasiswa)
-        $role = ($verifyResult['user_type'] ?? '') === 'pegawai' ? 'tutor' : 'mahasantri';
-        $user = $localUser ?? $this->upsertCampusRoleUser($identifier, $role);
+            // Jika bukan santri mukim di SAHAJA dan belum terdaftar di SIMUKIM lokal:
+            // Hanya izinkan jika user_type adalah pegawai/dosen (untuk calon tutor)
+            $isPegawai = ($verifyResult['user_type'] ?? '') === 'pegawai';
+            if (!$isPegawai) {
+                throw ValidationException::withMessages([
+                    'login_id' => 'Akun portal akademik Anda aktif, namun Anda belum terdaftar sebagai Mahasantri Mukim di Ma\'had Al-Jami\'ah. Silakan hubungi pengelola asrama atau lakukan pendaftaran asrama melalui portal SAHAJA.',
+                    'username' => 'Akun portal akademik Anda aktif, namun Anda belum terdaftar sebagai Mahasantri Mukim di Ma\'had Al-Jami\'ah. Silakan hubungi pengelola asrama atau lakukan pendaftaran asrama melalui portal SAHAJA.',
+                    'email'    => 'Akun portal akademik Anda aktif, namun Anda belum terdaftar sebagai Mahasantri Mukim di Ma\'had Al-Jami\'ah. Silakan hubungi pengelola asrama atau lakukan pendaftaran asrama melalui portal SAHAJA.',
+                ])->redirectTo(route('login'));
+            }
+
+            $user = $this->upsertCampusRoleUser($identifier, 'tutor');
+        } else {
+            $user = $localUser;
+        }
 
         $data = $verifyResult['data'] ?? [];
         if (!empty($data['nama'])) $user->name = $data['nama'];
@@ -56,11 +69,21 @@ class CampusAuthService
 
         if (($user->hasRole('mahasantri') || $user->hasRole('mudabbir') || $user->santri) && !empty($data)) {
             $prodi = !empty($data['prodi']) && !in_array(strtolower($data['prodi']), ['umum', '-', 'null', '']) ? trim($data['prodi']) : ($user->santri?->prodi ?? 'Umum');
+            $activePeriode = Periode::getActive();
             Santri::updateOrCreate(['user_id' => $user->id], array_filter([
-                'nomor_induk' => $user->nomor_induk, 'gender' => $data['gender'] ?? 'L', 'prodi' => $prodi, 'status' => 'aktif',
-                'angkatan' => $data['angkatan'] ?? (strlen($user->nomor_induk) >= 2 ? ('20' . substr($user->nomor_induk, 0, 2)) : date('Y')),
-                'no_hp' => $data['no_hp'] ?? null, 'fakultas' => $data['fakultas'] ?? null, 'alamat' => $data['alamat'] ?? null,
-                'hp_ayah' => $data['hp_ayah'] ?? null, 'email_ayah' => $data['email_ayah'] ?? null, 'hp_ibu' => $data['hp_ibu'] ?? null, 'email_ibu' => $data['email_ibu'] ?? null,
+                'periode_id'  => $user->santri?->periode_id ?? $activePeriode?->id,
+                'nomor_induk' => $user->nomor_induk,
+                'gender'      => $data['gender'] ?? 'L',
+                'prodi'       => $prodi,
+                'status'      => 'aktif',
+                'angkatan'    => $data['angkatan'] ?? (strlen($user->nomor_induk) >= 2 ? ('20' . substr($user->nomor_induk, 0, 2)) : date('Y')),
+                'no_hp'       => $data['no_hp'] ?? null,
+                'fakultas'    => $data['fakultas'] ?? null,
+                'alamat'      => $data['alamat'] ?? null,
+                'hp_ayah'     => $data['hp_ayah'] ?? null,
+                'email_ayah'  => $data['email_ayah'] ?? null,
+                'hp_ibu'      => $data['hp_ibu'] ?? null,
+                'email_ibu'   => $data['email_ibu'] ?? null,
             ], fn($v) => !is_null($v) && $v !== ''));
         }
 
