@@ -38,30 +38,55 @@ jobs:
           echo "DOCKER_IMAGE_VAL=${{ secrets.DOCKERHUB_USERNAME }}/simukim:latest" >> "$GITHUB_ENV"
 
       - name: Deploy to Server via SSH & Auto-Setup
-        uses: appleboy/ssh-action@v1.0.3
         env:
           COMPOSE_B64: ${{ env.COMPOSE_B64 }}
           DOCKER_IMAGE_VAL: ${{ env.DOCKER_IMAGE_VAL }}
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          timeout: 15s
-          command_timeout: 5m
-          debug: true
-          envs: COMPOSE_B64,DOCKER_IMAGE_VAL
-          script: |
+          SSH_KEY: ${{ secrets.SERVER_KEY }}
+          SSH_HOST: ${{ secrets.SERVER_HOST }}
+          SSH_USER: ${{ secrets.SERVER_USERNAME }}
+          SSH_PORT: ${{ secrets.SERVER_PORT || 22 }}
+          DEPLOY_DIR_VAL: ${{ secrets.SERVER_DEPLOY_PATH || '/www/wwwroot/simukim' }}
+          ENV_APP_URL: ${{ secrets.ENV_APP_URL }}
+          ENV_APP_KEY: ${{ secrets.ENV_APP_KEY }}
+          ENV_DB_DATABASE: ${{ secrets.ENV_DB_DATABASE || 'mahad_db' }}
+          ENV_DB_USERNAME: ${{ secrets.ENV_DB_USERNAME || 'mahad_user' }}
+          ENV_DB_PASSWORD: ${{ secrets.ENV_DB_PASSWORD }}
+          ENV_DB_ROOT_PASSWORD: ${{ secrets.ENV_DB_ROOT_PASSWORD }}
+          ENV_CAMPUS_API_BASE_URL: ${{ secrets.ENV_CAMPUS_API_BASE_URL || 'https://bridge.uinssc.ac.id' }}
+          ENV_BRIDGE_API_URL: ${{ secrets.ENV_BRIDGE_API_URL || 'https://bridge.uinssc.ac.id' }}
+          ENV_SAHAJA_API_URL: ${{ secrets.ENV_SAHAJA_API_URL || 'https://sahaja.uinssc.ac.id' }}
+          ENV_SAHAJA_API_KEY: ${{ secrets.ENV_SAHAJA_API_KEY || 'dev-key-sahaja-2026' }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          {
+            printf 'export COMPOSE_B64=%q\n' "$COMPOSE_B64"
+            printf 'export DOCKER_IMAGE_VAL=%q\n' "$DOCKER_IMAGE_VAL"
+            printf 'export DEPLOY_DIR=%q\n' "$DEPLOY_DIR_VAL"
+            printf 'export ENV_APP_URL=%q\n' "$ENV_APP_URL"
+            printf 'export ENV_APP_KEY=%q\n' "$ENV_APP_KEY"
+            printf 'export ENV_DB_DATABASE=%q\n' "$ENV_DB_DATABASE"
+            printf 'export ENV_DB_USERNAME=%q\n' "$ENV_DB_USERNAME"
+            printf 'export ENV_DB_PASSWORD=%q\n' "$ENV_DB_PASSWORD"
+            printf 'export ENV_DB_ROOT_PASSWORD=%q\n' "$ENV_DB_ROOT_PASSWORD"
+            printf 'export ENV_CAMPUS_API_BASE_URL=%q\n' "$ENV_CAMPUS_API_BASE_URL"
+            printf 'export ENV_BRIDGE_API_URL=%q\n' "$ENV_BRIDGE_API_URL"
+            printf 'export ENV_SAHAJA_API_URL=%q\n' "$ENV_SAHAJA_API_URL"
+            printf 'export ENV_SAHAJA_API_KEY=%q\n' "$ENV_SAHAJA_API_KEY"
+            printf 'export SSH_HOST_FALLBACK=%q\n' "$SSH_HOST"
+            cat << 'REMOTE_SCRIPT'
+            set -e
+
             # 1. Pastikan folder aplikasi ada di server
-            DEPLOY_DIR="${{ secrets.SERVER_DEPLOY_PATH }}"
-            DEPLOY_DIR="${DEPLOY_DIR:-/www/wwwroot/simukim}"
             mkdir -p "$DEPLOY_DIR"
             cd "$DEPLOY_DIR"
 
             # 2. Tentukan APP_URL (Default ke http://<IP_SERVER> jika belum pasang domain)
-            APP_URL_VAL="${{ secrets.ENV_APP_URL }}"
+            APP_URL_VAL="$ENV_APP_URL"
             if [ -z "$APP_URL_VAL" ]; then
-              APP_URL_VAL="http://${{ secrets.SERVER_HOST }}"
+              APP_URL_VAL="http://${SSH_HOST_FALLBACK}"
             fi
 
             # 3. Tentukan APP_KEY (Ambil dari Secret, atau pertahankan yang ada, atau generate aman)
@@ -70,9 +95,9 @@ jobs:
               EXISTING_KEY=$(grep '^APP_KEY=' .env | cut -d '=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r')
             fi
 
-            APP_KEY_VAL="${{ secrets.ENV_APP_KEY }}"
+            APP_KEY_VAL="$ENV_APP_KEY"
             if [ -z "$APP_KEY_VAL" ]; then
-              if [ -n "$EXISTING_KEY" ] && [ "$EXISTING_KEY" != "" ]; then
+              if [ -n "$EXISTING_KEY" ]; then
                 APP_KEY_VAL="$EXISTING_KEY"
               else
                 APP_KEY_VAL="base64:$(openssl rand -base64 32)"
@@ -80,7 +105,7 @@ jobs:
             fi
 
             # 4. Tentukan DB_PASSWORD
-            DB_PASS_VAL="${{ secrets.ENV_DB_PASSWORD }}"
+            DB_PASS_VAL="$ENV_DB_PASSWORD"
             if [ -z "$DB_PASS_VAL" ]; then
               if [ -f .env ]; then
                 EXISTING_PASS=$(grep '^DB_PASSWORD=' .env | cut -d '=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r')
@@ -88,39 +113,39 @@ jobs:
               DB_PASS_VAL="${EXISTING_PASS:-SimukimMahad2026!}"
             fi
 
-            # 5. Tulis berkas .env produksi secara otomatis
-            echo 'APP_NAME="SIMUKIM"' > .env
-            echo 'APP_ENV="production"' >> .env
-            echo "APP_KEY=\"$APP_KEY_VAL\"" >> .env
-            echo 'APP_DEBUG=false' >> .env
-            echo 'APP_TIMEZONE="Asia/Jakarta"' >> .env
-            echo "APP_URL=\"$APP_URL_VAL\"" >> .env
-            echo 'DB_CONNECTION="mysql"' >> .env
-            echo 'DB_HOST="db"' >> .env
-            echo 'DB_PORT="3306"' >> .env
-            echo "DB_DATABASE=\"${{ secrets.ENV_DB_DATABASE || 'mahad_db' }}\"" >> .env
-            echo "DB_USERNAME=\"${{ secrets.ENV_DB_USERNAME || 'mahad_user' }}\"" >> .env
-            echo "DB_PASSWORD=\"$DB_PASS_VAL\"" >> .env
-            echo "DB_ROOT_PASSWORD=\"${{ secrets.ENV_DB_ROOT_PASSWORD || '' }}\"" >> .env
-            sed -i '/DB_ROOT_PASSWORD=""/d' .env 2>/dev/null || true
-            if ! grep -q 'DB_ROOT_PASSWORD=' .env; then
-              echo "DB_ROOT_PASSWORD=\"$DB_PASS_VAL\"" >> .env
-            fi
-            echo "CAMPUS_API_BASE_URL=\"${{ secrets.ENV_CAMPUS_API_BASE_URL || 'https://bridge.uinssc.ac.id' }}\"" >> .env
-            echo "BRIDGE_API_URL=\"${{ secrets.ENV_BRIDGE_API_URL || 'https://bridge.uinssc.ac.id' }}\"" >> .env
-            echo 'CAMPUS_API_TIMEOUT=5' >> .env
-            echo 'CAMPUS_API_VERIFY_SSL=true' >> .env
-            echo "SAHAJA_API_URL=\"${{ secrets.ENV_SAHAJA_API_URL || 'https://sahaja.uinssc.ac.id' }}\"" >> .env
-            echo "SAHAJA_API_KEY=\"${{ secrets.ENV_SAHAJA_API_KEY || 'dev-key-sahaja-2026' }}\"" >> .env
-            echo 'SAHAJA_API_TIMEOUT=5' >> .env
-            echo 'SAHAJA_API_VERIFY_SSL=true' >> .env
-            echo 'SESSION_DRIVER="file"' >> .env
-            echo 'CACHE_STORE="file"' >> .env
-            echo 'QUEUE_CONNECTION="sync"' >> .env
-            echo 'FILESYSTEM_DISK="local"' >> .env
-            echo "DOCKER_IMAGE=\"$DOCKER_IMAGE_VAL\"" >> .env
+            DB_ROOT_VAL="${ENV_DB_ROOT_PASSWORD:-$DB_PASS_VAL}"
 
-            # 6. Tulis berkas docker-compose.yml terbaru dari payload workflow (aman untuk repo private/baru)
+            # 5. Tulis berkas .env produksi secara otomatis
+            cat > .env << ENVFILE
+          APP_NAME="SIMUKIM"
+          APP_ENV="production"
+          APP_KEY="$APP_KEY_VAL"
+          APP_DEBUG=false
+          APP_TIMEZONE="Asia/Jakarta"
+          APP_URL="$APP_URL_VAL"
+          DB_CONNECTION="mysql"
+          DB_HOST="db"
+          DB_PORT="3306"
+          DB_DATABASE="$ENV_DB_DATABASE"
+          DB_USERNAME="$ENV_DB_USERNAME"
+          DB_PASSWORD="$DB_PASS_VAL"
+          DB_ROOT_PASSWORD="$DB_ROOT_VAL"
+          CAMPUS_API_BASE_URL="$ENV_CAMPUS_API_BASE_URL"
+          BRIDGE_API_URL="$ENV_BRIDGE_API_URL"
+          CAMPUS_API_TIMEOUT=5
+          CAMPUS_API_VERIFY_SSL=true
+          SAHAJA_API_URL="$ENV_SAHAJA_API_URL"
+          SAHAJA_API_KEY="$ENV_SAHAJA_API_KEY"
+          SAHAJA_API_TIMEOUT=5
+          SAHAJA_API_VERIFY_SSL=true
+          SESSION_DRIVER="file"
+          CACHE_STORE="file"
+          QUEUE_CONNECTION="sync"
+          FILESYSTEM_DISK="local"
+          DOCKER_IMAGE="$DOCKER_IMAGE_VAL"
+          ENVFILE
+
+            # 6. Tulis berkas docker-compose.yml terbaru dari payload workflow
             echo "$COMPOSE_B64" | base64 -d > docker-compose.yml
 
             # 7. Tarik image terbaru dari Docker Hub
@@ -137,3 +162,5 @@ jobs:
             docker compose exec -T app php artisan optimize
 
             echo "🚀 Deployment SIMUKIM ($DOCKER_IMAGE_VAL) Berhasil!"
+          REMOTE_SCRIPT
+          } | ssh -v -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 -p "${SSH_PORT:-22}" -i ~/.ssh/deploy_key "${SSH_USER}@${SSH_HOST}" bash -s
