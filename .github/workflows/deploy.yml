@@ -47,6 +47,9 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
+          timeout: 15s
+          command_timeout: 5m
+          debug: true
           envs: COMPOSE_B64,DOCKER_IMAGE_VAL
           script: |
             # 1. Pastikan folder aplikasi ada di server
