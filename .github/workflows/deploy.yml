@@ -29,20 +29,29 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            kenn1213/mahad:latest
-            kenn1213/mahad:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/simukim:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/simukim:${{ github.sha }}
+
+      - name: Prepare docker-compose payload
+        run: |
+          echo "COMPOSE_B64=$(base64 -w0 docker-compose.yml)" >> "$GITHUB_ENV"
+          echo "DOCKER_IMAGE_VAL=${{ secrets.DOCKERHUB_USERNAME }}/simukim:latest" >> "$GITHUB_ENV"
 
       - name: Deploy to Server via SSH & Auto-Setup
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          COMPOSE_B64: ${{ env.COMPOSE_B64 }}
+          DOCKER_IMAGE_VAL: ${{ env.DOCKER_IMAGE_VAL }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
+          envs: COMPOSE_B64,DOCKER_IMAGE_VAL
           script: |
             # 1. Pastikan folder aplikasi ada di server
             DEPLOY_DIR="${{ secrets.SERVER_DEPLOY_PATH }}"
-            DEPLOY_DIR="${DEPLOY_DIR:-/home/ubuntu/simukim}"
+            DEPLOY_DIR="${DEPLOY_DIR:-/www/wwwroot/simukim}"
             mkdir -p "$DEPLOY_DIR"
             cd "$DEPLOY_DIR"
 
@@ -106,9 +115,10 @@ jobs:
             echo 'CACHE_STORE="file"' >> .env
             echo 'QUEUE_CONNECTION="sync"' >> .env
             echo 'FILESYSTEM_DISK="local"' >> .env
+            echo "DOCKER_IMAGE=\"$DOCKER_IMAGE_VAL\"" >> .env
 
-            # 6. Ambil berkas docker-compose.yml terbaru dari repositori
-            curl -fsSL https://raw.githubusercontent.com/akhariss/kp/main/docker-compose.yml -o docker-compose.yml
+            # 6. Tulis berkas docker-compose.yml terbaru dari payload workflow (aman untuk repo private/baru)
+            echo "$COMPOSE_B64" | base64 -d > docker-compose.yml
 
             # 7. Tarik image terbaru dari Docker Hub
             docker compose pull app
@@ -123,4 +133,4 @@ jobs:
             docker compose exec -T app php artisan migrate --force
             docker compose exec -T app php artisan optimize
 
-            echo "🚀 Deployment SIMUKIM (kenn1213/mahad:latest) Berhasil!"
+            echo "🚀 Deployment SIMUKIM ($DOCKER_IMAGE_VAL) Berhasil!"
