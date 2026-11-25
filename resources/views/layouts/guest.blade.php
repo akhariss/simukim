@@ -18,12 +18,12 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v=2">
 
     <!-- PWA & Mobile Web App Meta Tags -->
-    <link rel="manifest" href="{{ secure_asset('manifest.json') }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="SIMUKIM">
-    <link rel="apple-touch-icon" href="{{ secure_asset('icons/icon-192x192.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icons/icon-192x192.png') }}">
 
     <!-- Service Worker Registration -->
     <script>

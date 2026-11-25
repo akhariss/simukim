@@ -11,9 +11,9 @@
         <!-- Optimized Campus Background (83% Lighter WebP + Progressive JPG, Zero Freeze) -->
         <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
             <picture class="w-full h-full">
-                <source srcset="{{ secure_asset('images/mahad-bg.webp') }}" type="image/webp">
+                <source srcset="{{ asset('images/mahad-bg.webp') }}" type="image/webp">
                 <img
-                    src="{{ secure_asset('images/mahad-bg.jpg') }}"
+                    src="{{ asset('images/mahad-bg.jpg') }}"
                     alt="Kampus Ma'had Al-Jami'ah"
                     class="w-full h-full object-cover object-center filter brightness-95"
                     loading="eager"
