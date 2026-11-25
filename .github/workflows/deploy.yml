@@ -5,8 +5,8 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-deploy:
-    name: Build Docker Image & Deploy via SSH
+  build:
+    name: Build & Push Docker Image
     runs-on: ubuntu-latest
 
     steps:
@@ -32,91 +32,74 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/simukim:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/simukim:${{ github.sha }}
 
-      - name: Prepare docker-compose payload
+  deploy:
+    name: Deploy to Campus Server (Self-Hosted)
+    needs: build
+    runs-on: self-hosted
+
+    env:
+      DOCKER_IMAGE_VAL: ${{ secrets.DOCKERHUB_USERNAME }}/simukim:latest
+      DEPLOY_DIR_VAL: ${{ secrets.SERVER_DEPLOY_PATH || '/www/wwwroot/simukim' }}
+      ENV_APP_URL: ${{ secrets.ENV_APP_URL }}
+      ENV_APP_KEY: ${{ secrets.ENV_APP_KEY }}
+      ENV_DB_DATABASE: ${{ secrets.ENV_DB_DATABASE || 'mahad_db' }}
+      ENV_DB_USERNAME: ${{ secrets.ENV_DB_USERNAME || 'mahad_user' }}
+      ENV_DB_PASSWORD: ${{ secrets.ENV_DB_PASSWORD }}
+      ENV_DB_ROOT_PASSWORD: ${{ secrets.ENV_DB_ROOT_PASSWORD }}
+      ENV_CAMPUS_API_BASE_URL: ${{ secrets.ENV_CAMPUS_API_BASE_URL || 'https://bridge.uinssc.ac.id' }}
+      ENV_BRIDGE_API_URL: ${{ secrets.ENV_BRIDGE_API_URL || 'https://bridge.uinssc.ac.id' }}
+      ENV_SAHAJA_API_URL: ${{ secrets.ENV_SAHAJA_API_URL || 'https://sahaja.uinssc.ac.id' }}
+      ENV_SAHAJA_API_KEY: ${{ secrets.ENV_SAHAJA_API_KEY || 'dev-key-sahaja-2026' }}
+      SERVER_HOST_VAL: ${{ secrets.SERVER_HOST }}
+
+    steps:
+      - name: Checkout docker-compose.yml
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Deploy Containers & Run Migrations
         run: |
-          echo "COMPOSE_B64=$(base64 -w0 docker-compose.yml)" >> "$GITHUB_ENV"
-          echo "DOCKER_IMAGE_VAL=${{ secrets.DOCKERHUB_USERNAME }}/simukim:latest" >> "$GITHUB_ENV"
+          set -e
+          COMPOSE_SRC="$PWD/docker-compose.yml"
+          DEPLOY_DIR="$DEPLOY_DIR_VAL"
+          mkdir -p "$DEPLOY_DIR"
+          cd "$DEPLOY_DIR"
 
-      - name: Deploy to Server via SSH & Auto-Setup
-        env:
-          COMPOSE_B64: ${{ env.COMPOSE_B64 }}
-          DOCKER_IMAGE_VAL: ${{ env.DOCKER_IMAGE_VAL }}
-          SSH_KEY: ${{ secrets.SERVER_KEY }}
-          SSH_HOST: ${{ secrets.SERVER_HOST }}
-          SSH_USER: ${{ secrets.SERVER_USERNAME }}
-          SSH_PORT: ${{ secrets.SERVER_PORT || 22 }}
-          DEPLOY_DIR_VAL: ${{ secrets.SERVER_DEPLOY_PATH || '/www/wwwroot/simukim' }}
-          ENV_APP_URL: ${{ secrets.ENV_APP_URL }}
-          ENV_APP_KEY: ${{ secrets.ENV_APP_KEY }}
-          ENV_DB_DATABASE: ${{ secrets.ENV_DB_DATABASE || 'mahad_db' }}
-          ENV_DB_USERNAME: ${{ secrets.ENV_DB_USERNAME || 'mahad_user' }}
-          ENV_DB_PASSWORD: ${{ secrets.ENV_DB_PASSWORD }}
-          ENV_DB_ROOT_PASSWORD: ${{ secrets.ENV_DB_ROOT_PASSWORD }}
-          ENV_CAMPUS_API_BASE_URL: ${{ secrets.ENV_CAMPUS_API_BASE_URL || 'https://bridge.uinssc.ac.id' }}
-          ENV_BRIDGE_API_URL: ${{ secrets.ENV_BRIDGE_API_URL || 'https://bridge.uinssc.ac.id' }}
-          ENV_SAHAJA_API_URL: ${{ secrets.ENV_SAHAJA_API_URL || 'https://sahaja.uinssc.ac.id' }}
-          ENV_SAHAJA_API_KEY: ${{ secrets.ENV_SAHAJA_API_KEY || 'dev-key-sahaja-2026' }}
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
+          APP_URL_VAL="$ENV_APP_URL"
+          if [ -z "$APP_URL_VAL" ]; then
+            APP_URL_VAL="http://${SERVER_HOST_VAL:-103.140.22.112}"
+          fi
 
-          {
-            printf 'export COMPOSE_B64=%q\n' "$COMPOSE_B64"
-            printf 'export DOCKER_IMAGE_VAL=%q\n' "$DOCKER_IMAGE_VAL"
-            printf 'export DEPLOY_DIR=%q\n' "$DEPLOY_DIR_VAL"
-            printf 'export ENV_APP_URL=%q\n' "$ENV_APP_URL"
-            printf 'export ENV_APP_KEY=%q\n' "$ENV_APP_KEY"
-            printf 'export ENV_DB_DATABASE=%q\n' "$ENV_DB_DATABASE"
-            printf 'export ENV_DB_USERNAME=%q\n' "$ENV_DB_USERNAME"
-            printf 'export ENV_DB_PASSWORD=%q\n' "$ENV_DB_PASSWORD"
-            printf 'export ENV_DB_ROOT_PASSWORD=%q\n' "$ENV_DB_ROOT_PASSWORD"
-            printf 'export ENV_CAMPUS_API_BASE_URL=%q\n' "$ENV_CAMPUS_API_BASE_URL"
-            printf 'export ENV_BRIDGE_API_URL=%q\n' "$ENV_BRIDGE_API_URL"
-            printf 'export ENV_SAHAJA_API_URL=%q\n' "$ENV_SAHAJA_API_URL"
-            printf 'export ENV_SAHAJA_API_KEY=%q\n' "$ENV_SAHAJA_API_KEY"
-            printf 'export SSH_HOST_FALLBACK=%q\n' "$SSH_HOST"
-            cat << 'REMOTE_SCRIPT'
-            set -e
+          EXISTING_KEY=""
+          if [ -f .env ]; then
+            EXISTING_KEY=$(grep '^APP_KEY=' .env | cut -d '=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r')
+          fi
 
-            # 1. Pastikan folder aplikasi ada di server
-            mkdir -p "$DEPLOY_DIR"
-            cd "$DEPLOY_DIR"
-
-            # 2. Tentukan APP_URL (Default ke http://<IP_SERVER> jika belum pasang domain)
-            APP_URL_VAL="$ENV_APP_URL"
-            if [ -z "$APP_URL_VAL" ]; then
-              APP_URL_VAL="http://${SSH_HOST_FALLBACK}"
+          APP_KEY_VAL="$ENV_APP_KEY"
+          if [ -z "$APP_KEY_VAL" ]; then
+            if [ -n "$EXISTING_KEY" ]; then
+              APP_KEY_VAL="$EXISTING_KEY"
+            else
+              APP_KEY_VAL="base64:$(openssl rand -base64 32)"
             fi
+          fi
 
-            # 3. Tentukan APP_KEY (Ambil dari Secret, atau pertahankan yang ada, atau generate aman)
-            EXISTING_KEY=""
+          DB_PASS_VAL="$ENV_DB_PASSWORD"
+          if [ -z "$DB_PASS_VAL" ]; then
             if [ -f .env ]; then
-              EXISTING_KEY=$(grep '^APP_KEY=' .env | cut -d '=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r')
+              EXISTING_PASS=$(grep '^DB_PASSWORD=' .env | cut -d '=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r')
             fi
+            DB_PASS_VAL="${EXISTING_PASS:-SimukimMahad2026!}"
+          fi
 
-            APP_KEY_VAL="$ENV_APP_KEY"
-            if [ -z "$APP_KEY_VAL" ]; then
-              if [ -n "$EXISTING_KEY" ]; then
-                APP_KEY_VAL="$EXISTING_KEY"
-              else
-                APP_KEY_VAL="base64:$(openssl rand -base64 32)"
-              fi
-            fi
+          DB_ROOT_VAL="${ENV_DB_ROOT_PASSWORD:-$DB_PASS_VAL}"
 
-            # 4. Tentukan DB_PASSWORD
-            DB_PASS_VAL="$ENV_DB_PASSWORD"
-            if [ -z "$DB_PASS_VAL" ]; then
-              if [ -f .env ]; then
-                EXISTING_PASS=$(grep '^DB_PASSWORD=' .env | cut -d '=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r')
-              fi
-              DB_PASS_VAL="${EXISTING_PASS:-SimukimMahad2026!}"
-            fi
-
-            DB_ROOT_VAL="${ENV_DB_ROOT_PASSWORD:-$DB_PASS_VAL}"
-
-            # 5. Tulis berkas .env produksi secara otomatis
-            cat > .env << ENVFILE
+          cat > .env << ENVFILE
           APP_NAME="SIMUKIM"
           APP_ENV="production"
           APP_KEY="$APP_KEY_VAL"
@@ -145,22 +128,15 @@ jobs:
           DOCKER_IMAGE="$DOCKER_IMAGE_VAL"
           ENVFILE
 
-            # 6. Tulis berkas docker-compose.yml terbaru dari payload workflow
-            echo "$COMPOSE_B64" | base64 -d > docker-compose.yml
+          cp "$COMPOSE_SRC" docker-compose.yml
 
-            # 7. Tarik image terbaru dari Docker Hub
-            docker compose pull app
+          docker compose pull app
+          docker compose up -d
 
-            # 8. Jalankan container baru
-            docker compose up -d
+          echo "Menunggu database siap..."
+          sleep 10
+          docker compose exec -T app php artisan config:clear
+          docker compose exec -T app php artisan migrate --force
+          docker compose exec -T app php artisan optimize
 
-            # 9. Bersihkan cache lama, tunggu database siap lalu jalankan migrasi database & cache optimize
-            echo "Menunggu database siap..."
-            sleep 8
-            docker compose exec -T app php artisan config:clear
-            docker compose exec -T app php artisan migrate --force
-            docker compose exec -T app php artisan optimize
-
-            echo "🚀 Deployment SIMUKIM ($DOCKER_IMAGE_VAL) Berhasil!"
-          REMOTE_SCRIPT
-          } | ssh -v -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 -p "${SSH_PORT:-22}" -i ~/.ssh/deploy_key "${SSH_USER}@${SSH_HOST}" bash -s
+          echo "🚀 Deployment SIMUKIM ($DOCKER_IMAGE_VAL) Berhasil!"
