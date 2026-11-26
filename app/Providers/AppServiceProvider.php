@@ -24,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
 
+        if (parse_url((string) config('app.url'), PHP_URL_PORT)) {
+            \Illuminate\Support\Facades\URL::forceRootUrl(rtrim((string) config('app.url'), '/'));
+        }
+
         Gate::policy(\App\Models\Kelas::class, \App\Policies\KelasPolicy::class);
         Gate::policy(\App\Models\Kamar::class, \App\Policies\KamarPolicy::class);
         Gate::policy(\App\Models\PenempatanKamar::class, \App\Policies\PenempatanKamarPolicy::class);
